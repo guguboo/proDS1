@@ -8,6 +8,7 @@ Created on Tue Mar  5 11:39:34 2024
 
 # %% importing libraries
 import rasterio
+import pandas as pd
 import geopandas as gpd
 from osgeo import gdal, osr
 import rasterio.crs as CRS
@@ -86,6 +87,34 @@ my_geojson = [{
     ]
 }]
 
+bandung_geojson = [{
+    "type": "Polygon",
+    "coordinates": [
+          [
+            [
+              107.64052855847251,
+              -6.978469526805924
+            ],
+            [
+              107.63956349477291,
+              -6.979924135284435
+            ],
+            [
+              107.64272675912213,
+              -6.981520651582898
+            ],
+            [
+              107.64354885042252,
+              -6.979480657568772
+            ],
+            [
+              107.64052855847251,
+              -6.978469526805924
+            ]
+          ]
+        ],
+    }]
+
 
 # %% rgb
 # my_image = np.dstack((B2/74.54, B3/70.7, B4/68.14))
@@ -94,7 +123,7 @@ my_geojson = [{
 # %% try geopandas
 print(my_geojson[0]["coordinates"][0])
 
-polygon = Polygon(my_geojson[0]["coordinates"][0])
+polygon = Polygon(bandung_geojson[0]["coordinates"][0])
 polygon_gdf = gpd.GeoDataFrame(geometry=[polygon])
 polygon_gdf.crs = "EPSG:4326"  # Assuming WGS84
 # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
@@ -114,13 +143,13 @@ print(clipped_b2.max())
 print(clipped_b3.max())
 print(clipped_b4.max())
 
-print(clipped_b2)
+print(clipped_b2.shape)
 
 # %% show rgb
 
-normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 600
-normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 600
-normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 600
+normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 255
+normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 255
+normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 255
 
 print(normalized_b2.max())
 
@@ -129,4 +158,19 @@ rgb_raw = np.dstack((clipped_b2[0], clipped_b3[0], clipped_b4[0]))
 
 plt.figure(figsize=(20, 12))  # Set width to 10 inches, height to 6 inches
 plt.imshow(rgb_image)
-# plt.imshow(rgb_raw)
+
+
+# %% convert matrix 2d menjadi 1d
+b2_flatten = normalized_b2.flatten()
+b3_flatten = normalized_b3.flatten()
+b4_flatten = normalized_b4.flatten()
+
+print(b2_flatten)
+
+out_df = pd.DataFrame({'B2': b2_flatten, 'B3': b3_flatten, 'B4': b4_flatten})
+
+out_df.to_excel('testing_output.xlsx', index=False)
+
+
+import os
+print(f'Current working directory: {os.getcwd()}')
