@@ -11,14 +11,10 @@ import rasterio
 import os
 import pandas as pd
 import geopandas as gpd
-from osgeo import gdal, osr
 import rasterio.crs as CRS
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
-from shapely.geometry import shape, Polygon
-import pyproj
-from fiona.crs import from_epsg
 
 # %% dataset load resolusi 10m
 
@@ -130,32 +126,69 @@ bandung_geojson = [{
         ],
     }]
 
-# %% cobain import geojson
+# %%  buat dataset labelled (latihan)
 
 geojson_path = script_directory + "/geojson/"
 
-geojson_filename = ["testing_labelling.geojson"]
+geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson"]
+
+B2_output = []
+B3_output = []
+B4_output = []
+labels_output = []
+
+label = ""
 
 for file in geojson_filename: 
+    out_of_bound_count = 0
+    print("proses file " + file)
     multipoints_gdf = gpd.read_file(geojson_path + file)
-    multipoints_gdf.to_crs(b2_src.crs)
+    multipoints_gdf = multipoints_gdf.to_crs(b2_src.crs)
     
     for index, kategori in multipoints_gdf.iterrows():
         multipoint_geometry = kategori['geometry']
         
+        if index == 0:
+            label = "bangunan"
+        elif index == 1:
+            label = "area_hijau"
+        else:
+            label = "air"
+            
         for point in multipoint_geometry.geoms:
             x, y = point.x, point.y
-            col, row = map(int, b2_src.index(x, y))
+            x_raster, y_raster = b2_src.index(x, y)
             
-            print(str(x) + " " + str(y))
-            print(str(col) + " " + str(row))
+            
+            try:
+                B2_output.append(B2[x_raster][y_raster])
+                B3_output.append(B3[x_raster][y_raster])
+                B4_output.append(B4[x_raster][y_raster])
+                labels_output.append(label)
+            except:
+                out_of_bound_count += 1
+                
+                
+    print("koordinat2 yang out of bound :" + str(out_of_bound_count))
+#output file dalam excel
+output_counter = 1
+done_output = False
+output_filename = 'dataset_satelit_latihan'
+out_df = pd.DataFrame({'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'jenis_lahan': labels_output})
 
+while not done_output:
+    try:    
+        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
+        done_output = True
+    except:
+        output_counter += 1
+        
 # %% try geopandas
 print(my_geojson[0]["coordinates"][0])
 
 polygon = Polygon(my_geojson[0]["coordinates"][0])
 #polygon_gdf = gpd.GeoDataFrame(geometry=[polygon])
-polygon_gdf = gpd.read_file(geojson_path + file)
+polygon_gdf = gpd.read_file(geojson_path + file) 
 polygon_gdf.crs = "EPSG:4326"  # Assuming WGS84
 # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
 
