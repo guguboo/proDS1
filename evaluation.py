@@ -11,11 +11,11 @@ from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, r
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#%% contoh arraynya
+#%% read excel dan masukan ke variabel
 df = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/proDS1/prediction_results.xlsx")
 prediction_array = df['Predicted']
 true_array = df['Actual']
-classes = true_array.unique()
+classes = set(true_array.unique())
 
 #%% function buat matrix
 def evaluation_function(prediction_array, truth_array):
@@ -25,7 +25,7 @@ def evaluation_function(prediction_array, truth_array):
     # Plot confusion matrix
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", 
-                xticklabels=set(truth_array), yticklabels=set(truth_array))
+                xticklabels=classes, yticklabels=classes)
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix')
