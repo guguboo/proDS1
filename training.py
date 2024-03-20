@@ -11,14 +11,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
 # Load the data from the Excel file
-data = pd.read_excel('C://mak/PRODS/dataset_satelit_latihan_1.xlsx')
+data = pd.read_excel('/Users/kevinchristian/Downloads/dataset_satelit_latihan_1.xlsx')
 
 # Split the data into features (spectral bands) and target label
-X = data[['B2', 'B3', 'B4']]  # Features: Spectral bands B2, B3, B4
+X = data[['B2', 'B4','B3']]  # Features: Spectral bands B2, B3, B4
 y = data['jenis_lahan']        # Target label: Land cover types
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Initialize the Random Forest Classifier
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
