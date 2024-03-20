@@ -7,6 +7,7 @@ Created on Tue Mar 19 13:06:16 2024
 """
 # %% import libraries
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
