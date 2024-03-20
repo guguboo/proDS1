@@ -12,8 +12,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 #%% contoh arraynya
-prediction_array = [1, 3, 2, 2, 1, 1]
-true_array = [1, 1, 3, 2, 2, 1]
+df = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/proDS1/prediction_results.xlsx")
+prediction_array = df['Predicted']
+true_array = df['Actual']
+classes = true_array.unique()
 
 #%% function buat matrix
 def evaluation_function(prediction_array, truth_array):
@@ -36,12 +38,19 @@ def evaluation_function(prediction_array, truth_array):
     f1 = f1_score(truth_array, prediction_array, average=None)
     
     # Print metrics
-    print("Accuracy:", accuracy)
-    print("Precision:", precision)
-    print("Recall:", recall)
-    print("F1 Score:", f1)
-    f1 = f1_score(truth_array, prediction_array, average='weighted')
-    print("F1 Score (weighted):", f1)
+    print("Accuracy: {:.2f}%".format(accuracy * 100))
+    print("Precision")
+    for i, cls in enumerate(classes):
+        print("Class", cls, ":", "{:.2f}%".format(precision[i] * 100))
+    print("Recall")
+    for i, cls in enumerate(classes):  
+        print("Class", cls, ":", "{:.2f}%".format(recall[i] * 100))
+    print("F1 score")
+    for i, cls in enumerate(classes):
+        print("Class", cls, ":", "{:.2f}%".format(f1[i] * 100))
+
+    f1_weighted = f1_score(truth_array, prediction_array, average='weighted')
+    print("F1 Score (weighted): {:.2f}%".format(f1_weighted * 100))
 
 evaluation_function(prediction_array, true_array)
 #%%
