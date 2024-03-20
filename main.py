@@ -126,7 +126,7 @@ bandung_geojson = [{
         ],
     }]
 
-# %%  buat dataset labelled (latihan)
+# %%  buat dataset labelled (latihan) 10m resolusi
 
 geojson_path = script_directory + "/geojson/"
 
@@ -183,6 +183,78 @@ while not done_output:
     except:
         output_counter += 1
         
+#%% buat dataset labelled untuk resolusi 20m
+geojson_path = script_directory + "/geojson/"
+
+geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson"]
+
+B1_output = []
+B2_output = []
+B3_output = []
+B4_output = []
+B5_output = []
+B6_output = []
+B7_output = []
+B8A_output = []
+B11_output = []
+B12_output = []
+labels_output = []
+
+label = ""
+
+for file in geojson_filename: 
+    out_of_bound_count = 0
+    print("proses file " + file)
+    multipoints_gdf = gpd.read_file(geojson_path + file)
+    multipoints_gdf = multipoints_gdf.to_crs(b1_src_20.crs)
+    
+    for index, kategori in multipoints_gdf.iterrows():
+        multipoint_geometry = kategori['geometry']
+        
+        if index == 0:
+            label = "bangunan"
+        elif index == 1:
+            label = "area_hijau"
+        else:
+            label = "air"
+            
+        for point in multipoint_geometry.geoms:
+            x, y = point.x, point.y
+            x_raster, y_raster = b1_src_20.index(x, y)
+            
+            
+            try:
+                B1_output.append(B1_20[x_raster][y_raster])
+                B2_output.append(B2_20[x_raster][y_raster])
+                B3_output.append(B3_20[x_raster][y_raster])
+                B4_output.append(B4_20[x_raster][y_raster])
+                B5_output.append(B5_20[x_raster][y_raster])
+                B6_output.append(B6_20[x_raster][y_raster])
+                B7_output.append(B7_20[x_raster][y_raster])
+                B8A_output.append(B8A_20[x_raster][y_raster])
+                B11_output.append(B11_20[x_raster][y_raster])
+                B12_output.append(B12_20[x_raster][y_raster])
+                labels_output.append(label)
+            except:
+                out_of_bound_count += 1
+                
+    print()
+                
+    print("koordinat2 yang out of bound :" + str(out_of_bound_count))
+#output file dalam excel
+output_counter = 1
+done_output = False
+output_filename = 'dataset_satelit_latihan_20m'
+out_df = pd.DataFrame({'B1': B1_output, 'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'B5': B5_output, 'B6': B6_output, 'B7': B7_output, 'B8': B8A_output, 'B11': B11_output, 'B12': B12_output, 'jenis_lahan': labels_output})
+
+while not done_output:
+    try:    
+        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
+        done_output = True
+    except:
+        output_counter += 1
+
+
 # %% try geopandas
 print(my_geojson[0]["coordinates"][0])
 

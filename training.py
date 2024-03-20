@@ -18,17 +18,12 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 #%% KODE TRAINING
 
 # Load the data from the Excel file
-<<<<<<< Updated upstream
-data = pd.read_excel('/Users/kevinchristian/Downloads/dataset_satelit_latihan_1.xlsx')
 
-# Split the data into features (spectral bands) and target label
-X = data[['B2', 'B4','B3']]  # Features: Spectral bands B2, B3, B4
-=======
 data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_1.xlsx')
 
 # Split the data into features (spectral bands) and target label
 X = data[['B2', 'B4']]  # Features: Spectral bands B2, B3, B4
->>>>>>> Stashed changes
+
 y = data['jenis_lahan']        # Target label: Land cover types
 
 # Split the data into training and testing sets
