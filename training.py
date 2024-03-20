@@ -5,16 +5,30 @@ Created on Wed Mar 20 11:58:23 2024
 @author: hp
 """
 
+#%% IMPORT IMPORTAN
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
+script_directory = os.path.dirname(os.path.abspath(__file__))
+
+
+#%% KODE TRAINING
+
 # Load the data from the Excel file
+<<<<<<< Updated upstream
 data = pd.read_excel('/Users/kevinchristian/Downloads/dataset_satelit_latihan_1.xlsx')
 
 # Split the data into features (spectral bands) and target label
 X = data[['B2', 'B4','B3']]  # Features: Spectral bands B2, B3, B4
+=======
+data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_1.xlsx')
+
+# Split the data into features (spectral bands) and target label
+X = data[['B2', 'B4']]  # Features: Spectral bands B2, B3, B4
+>>>>>>> Stashed changes
 y = data['jenis_lahan']        # Target label: Land cover types
 
 # Split the data into training and testing sets
@@ -32,15 +46,5 @@ y_pred = rf_classifier.predict(X_test)
 # Create a DataFrame to store predicted and actual labels
 results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
 
-# Evaluate the performance of the classifier
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
-
-# Print the DataFrame with predicted and actual labels
-print("\nPredicted and Actual Labels:")
-print(results_df)
-
 # Export the results DataFrame to an Excel file
-results_df.to_excel('prediction_results.xlsx', index=False)
+results_df.to_excel(script_directory + '/prediction_results.xlsx', index=False)

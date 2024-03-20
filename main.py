@@ -16,7 +16,7 @@ from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
 
-# %% dataset load resolusi 10m
+# %% dataset load resolusi 10m (download dulu di drive, lalu di folder jp2 buat folder 10m dan extract datanya di situ)
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
 print(script_directory)
