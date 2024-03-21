@@ -70,7 +70,12 @@ B12_20 = b12_src_20.read(1)
 # %% METADATA
 
 
-print(b7_src_20.meta)
+print(B1_20)
+print(B1_20.shape)
+
+upscaled_B1_20 = upscale_array(B1_20)
+print(upscaled_B1_20)
+print(upscaled_B1_20.shape)
 # %% geoJSON
 
 my_geojson = [{
@@ -254,6 +259,21 @@ while not done_output:
     except:
         output_counter += 1
 
+
+
+# %% function untuk meng upscale resolusi yang 20m
+
+def upscale_array(a_array):
+    height, width = a_array.shape
+
+    upscaled_array = np.zeros((height*2, width*2), dtype=a_array.dtype)
+
+    for i in range(height*2):
+        for j in range(width*2):
+            orig_i, orig_j = i // 2, j // 2
+            upscaled_array[i, j] = a_array[orig_i, orig_j]
+
+    return upscaled_array
 
 # %% try geopandas
 print(my_geojson[0]["coordinates"][0])
