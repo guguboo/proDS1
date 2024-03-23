@@ -17,41 +17,41 @@ from itertools import combinations
 script_directory = os.path.dirname(os.path.abspath(__file__))
 
 
-#%% KODE TRAINING
+#%% KODE TRAINING (MARK VERSION)
 
-# Load the data from the Excel file
+# # Load the data from the Excel file
 
-data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_1.xlsx')
+# data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_1.xlsx')
 
-# Split the data into features (spectral bands) and target label
-
-
-X = data[['B2', 'B4']]  # Features: Spectral bands B2, B3, B4
-# X = data[['B4', 'B6', 'B7', 'B8', 'B11', 'B12']]  
-
-y = data['jenis_lahan']        # Target label: Land cover types
-
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Initialize the Random Forest Classifier
-rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-
-# Train the classifier on the training data
-rf_classifier.fit(X_train, y_train)
-
-# Predict land cover types for the test data
-y_pred = rf_classifier.predict(X_test)
-
-# Create a DataFrame to store predicted and actual labels
-results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
-
-# Export the results DataFrame to an Excel file
-results_df.to_excel(script_directory + '/prediction_results.xlsx', index=False)
+# # Split the data into features (spectral bands) and target label
 
 
+# X = data[['B2', 'B4']]  # Features: Spectral bands B2, B3, B4
+# # X = data[['B4', 'B6', 'B7', 'B8', 'B11', 'B12']]  
 
-#%%
+# y = data['jenis_lahan']        # Target label: Land cover types
+
+# # Split the data into training and testing sets
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# # Initialize the Random Forest Classifier
+# rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# # Train the classifier on the training data
+# rf_classifier.fit(X_train, y_train)
+
+# # Predict land cover types for the test data
+# y_pred = rf_classifier.predict(X_test)
+
+# # Create a DataFrame to store predicted and actual labels
+# results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
+
+# # Export the results DataFrame to an Excel file
+# results_df.to_excel(script_directory + '/prediction_results.xlsx', index=False)
+
+
+
+#%% KODE TRAINING (VICO VERSION)
 
 def train(x, y, bands):
     
