@@ -17,7 +17,7 @@ import seaborn as sns
 script_directory = os.path.dirname(os.path.abspath(__file__))
 #%% read excel dan masukan ke variabel (CONTOH)
 
-df = pd.read_excel(script_directory + "/prediction_result/prediction_result_B1_B2_B3.xlsx")
+df = pd.read_excel(script_directory + "/prediction_results.xlsx")
 
 prediction_array = df['Predicted']
 true_array = df['Actual']
@@ -25,44 +25,44 @@ evaluation_function(prediction_array, true_array, [""])
 
 #%% function buat matrix (andrea version)
 
-# def evaluation_function(prediction_array, truth_array, bands):
+def evaluation_function(prediction_array, truth_array, bands):
     
-#     global f1_air_max, f1_bangunan_max, f1_area_hijau_max
-#     global band_air, band_bangunan, band_area_hijau
-#     # Compute confusion matrix
-#     cm = confusion_matrix(truth_array, prediction_array)
-#     classes = set(truth_array.unique())
+    global f1_air_max, f1_bangunan_max, f1_area_hijau_max
+    global band_air, band_bangunan, band_area_hijau
+    # Compute confusion matrix
+    cm = confusion_matrix(truth_array, prediction_array)
+    classes = set(truth_array.unique())
     
-#     # Plot confusion matrix
-#     plt.figure(figsize=(8, 6))
-#     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", 
-#                 xticklabels=classes, yticklabels=classes)
-#     plt.xlabel('Predicted')
-#     plt.ylabel('True')
-#     plt.title('Confusion Matrix')
-#     plt.show()
+    # Plot confusion matrix
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", 
+                xticklabels=classes, yticklabels=classes)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+    plt.show()
     
-#     # Compute metrics
-#     accuracy = accuracy_score(truth_array, prediction_array)
-#     precision = precision_score(truth_array, prediction_array, average=None)
-#     recall = recall_score(truth_array, prediction_array, average=None)
-#     f1 = f1_score(truth_array, prediction_array, average=None)
+    # Compute metrics
+    accuracy = accuracy_score(truth_array, prediction_array)
+    precision = precision_score(truth_array, prediction_array, average=None)
+    recall = recall_score(truth_array, prediction_array, average=None)
+    f1 = f1_score(truth_array, prediction_array, average=None)
     
-#     # Print metrics
-#     print("Accuracy: {:.2f}%".format(accuracy * 100))
-#     print("Precision")
-#     for i, cls in enumerate(classes):
-#         print("Class", cls, ":", "{:.2f}%".format(precision[i] * 100))
-#     print("Recall")
-#     for i, cls in enumerate(classes):  
-#         print("Class", cls, ":", "{:.2f}%".format(recall[i] * 100))
-#     print("F1 score")
-#     for i, cls in enumerate(classes):
-#         print("Class", cls, ":", "{:.2f}%".format(f1[i] * 100))
+    # Print metrics
+    print("Accuracy: {:.2f}%".format(accuracy * 100))
+    print("Precision")
+    for i, cls in enumerate(classes):
+        print("Class", cls, ":", "{:.2f}%".format(precision[i] * 100))
+    print("Recall")
+    for i, cls in enumerate(classes):  
+        print("Class", cls, ":", "{:.2f}%".format(recall[i] * 100))
+    print("F1 score")
+    for i, cls in enumerate(classes):
+        print("Class", cls, ":", "{:.2f}%".format(f1[i] * 100))
 
-#     f1_weighted = f1_score(truth_array, prediction_array, average='weighted')
-#     print("F1 Score (weighted): {:.2f}%".format(f1_weighted * 100))
-#     print()
+    f1_weighted = f1_score(truth_array, prediction_array, average='weighted')
+    print("F1 Score (weighted): {:.2f}%".format(f1_weighted * 100))
+    print()
     
     
 #%% best variables
@@ -127,6 +127,8 @@ for i in range (1, 11):
         true_array = df['Actual']
             
         evaluation_function(prediction_array, true_array, selected)
+        
+    print(f"done for combination {i}")
     
 print(f"{band_air} is the best for air, with f1 score: {f1_air_max * 100:.2f}%")
 print(f"{band_bangunan} is the best for bangunan, with f1 score: {f1_bangunan_max * 100:.2f}%")

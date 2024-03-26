@@ -10,15 +10,16 @@ Created on Tue Mar  5 11:39:34 2024
 import rasterio
 import os
 import pandas as pd
+from shapely import Polygon
 import geopandas as gpd
 import rasterio.crs as CRS
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
 
+script_directory = os.path.dirname(os.path.abspath(__file__))
 # %% dataset load resolusi 10m (download dulu di drive, lalu di folder jp2 buat folder 10m dan extract datanya di situ)
 
-script_directory = os.path.dirname(os.path.abspath(__file__))
 print(script_directory)
 
 b2_path = script_directory + '/jp2/10m/T48MYT_20231220T030131_B02_10m.jp2'
@@ -73,9 +74,6 @@ B12_20 = b12_src_20.read(1)
 print(B1_20)
 print(B1_20.shape)
 
-upscaled_B1_20 = upscale_array(B1_20)
-print(upscaled_B1_20)
-print(upscaled_B1_20.shape)
 # %% geoJSON
 
 my_geojson = [{
@@ -103,95 +101,101 @@ my_geojson = [{
     ]
 }]
 
-bandung_geojson = [{
+test_geojson=[{
     "type": "Polygon",
     "coordinates": [
           [
             [
-              107.64052855847251,
-              -6.978469526805924
+              107.60178147990769,
+              -6.905727488511772
             ],
             [
-              107.63956349477291,
-              -6.979924135284435
+              107.56077233312823,
+              -6.961069947029458
             ],
             [
-              107.64272675912213,
-              -6.981520651582898
+              107.61000487795548,
+              -6.997605717170558
             ],
             [
-              107.64354885042252,
-              -6.979480657568772
+              107.63186672099931,
+              -6.963129384252156
             ],
             [
-              107.6405285 5847251,
-              -6.978469526805924
+              107.63200310067765,
+              -6.9221012699455144
+            ],
+            [
+              107.60178147990769,
+              -6.905727488511772
             ]
           ]
-        ],
+        ]
     }]
 
 # %%  buat dataset labelled (latihan) 10m resolusi
 
-geojson_path = script_directory + "/geojson/"
+# geojson_path = script_directory + "/geojson/"
 
-geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson"]
+# geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson"]
 
-B2_output = []
-B3_output = []
-B4_output = []
-labels_output = []
 
-label = ""
+# B2_output = []
+# B3_output = []
+# B4_output = []
+# labels_output = []
 
-for file in geojson_filename: 
-    out_of_bound_count = 0
-    print("proses file " + file)
-    multipoints_gdf = gpd.read_file(geojson_path + file)
-    multipoints_gdf = multipoints_gdf.to_crs(b2_src.crs)
+# label = ""
+
+# for file in geojson_filename: 
+#     out_of_bound_count = 0
+#     print("proses file " + file)
+#     multipoints_gdf = gpd.read_file(geojson_path + file)
+#     multipoints_gdf = multipoints_gdf.to_crs(b2_src.crs)
     
-    for index, kategori in multipoints_gdf.iterrows():
-        multipoint_geometry = kategori['geometry']
+#     for index, kategori in multipoints_gdf.iterrows():
+#         multipoint_geometry = kategori['geometry']
         
-        if index == 0:
-            label = "bangunan"
-        elif index == 1:
-            label = "area_hijau"
-        else:
-            label = "air"
+#         if index == 0:
+#             label = "bangunan"
+#         elif index == 1:
+#             label = "area_hijau"
+#         else:
+#             label = "air"
             
-        for point in multipoint_geometry.geoms:
-            x, y = point.x, point.y
-            x_raster, y_raster = b2_src.index(x, y)
+#         for point in multipoint_geometry.geoms:
+#             x, y = point.x, point.y
+#             x_raster, y_raster = b2_src.index(x, y)
             
             
-            try:
-                B2_output.append(B2[x_raster][y_raster])
-                B3_output.append(B3[x_raster][y_raster])
-                B4_output.append(B4[x_raster][y_raster])
-                labels_output.append(label)
-            except:
-                out_of_bound_count += 1
+#             try:
+#                 B2_output.append(B2[x_raster][y_raster])
+#                 B3_output.append(B3[x_raster][y_raster])
+#                 B4_output.append(B4[x_raster][y_raster])
+#                 labels_output.append(label)
+#             except:
+#                 out_of_bound_count += 1
                 
                 
-    print("koordinat2 yang out of bound :" + str(out_of_bound_count))
-#output file dalam excel
-output_counter = 1
-done_output = False
-output_filename = 'dataset_satelit_latihan'
-out_df = pd.DataFrame({'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'jenis_lahan': labels_output})
+#     print("koordinat2 yang out of bound :" + str(out_of_bound_count))
+# #output file dalam excel
+# output_counter = 1
+# done_output = False
+# output_filename = 'dataset_satelit_latihan'
+# out_df = pd.DataFrame({'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'jenis_lahan': labels_output})
 
-while not done_output:
-    try:    
-        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
-        done_output = True
-    except:
-        output_counter += 1
+# while not done_output:
+#     try:    
+#         out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
+#         done_output = True
+#     except:
+#         output_counter += 1
         
 #%% buat dataset labelled untuk resolusi 20m
 geojson_path = script_directory + "/geojson/"
 
-geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson"]
+geojson_filename = ["labelling_latihan_1.geojson", "labelling_latihan_2.geojson", "labelling_latihan_3.geojson"]
+jumlah_labeled_file = 4
 
 B1_output = []
 B2_output = []
@@ -207,10 +211,11 @@ labels_output = []
 
 label = ""
 
-for file in geojson_filename: 
+for file_number in range(1, jumlah_labeled_file+1): 
     out_of_bound_count = 0
-    print("proses file " + file)
-    multipoints_gdf = gpd.read_file(geojson_path + file)
+    filename = "labelling_latihan_" + str(file_number) + ".geojson"
+    print("proses file " + filename)
+    multipoints_gdf = gpd.read_file(geojson_path + filename)
     multipoints_gdf = multipoints_gdf.to_crs(b1_src_20.crs)
     
     for index, kategori in multipoints_gdf.iterrows():
@@ -242,15 +247,19 @@ for file in geojson_filename:
                 labels_output.append(label)
             except:
                 out_of_bound_count += 1
-                
-    print()
-                
+                                
     print("koordinat2 yang out of bound :" + str(out_of_bound_count))
-#output file dalam excel
+    print()
+    
+#%% output ke excel
+
+
 output_counter = 1
 done_output = False
 output_filename = 'dataset_satelit_latihan_20m'
 out_df = pd.DataFrame({'B1': B1_output, 'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'B5': B5_output, 'B6': B6_output, 'B7': B7_output, 'B8': B8A_output, 'B11': B11_output, 'B12': B12_output, 'jenis_lahan': labels_output})
+
+out_df.drop_duplicates()
 
 while not done_output:
     try:    
@@ -276,33 +285,57 @@ def upscale_array(a_array):
     return upscaled_array
 
 # %% try geopandas
-print(my_geojson[0]["coordinates"][0])
+print(test_geojson[0]["coordinates"][0])
 
-polygon = Polygon(my_geojson[0]["coordinates"][0])
-#polygon_gdf = gpd.GeoDataFrame(geometry=[polygon])
-polygon_gdf = gpd.read_file(geojson_path + file) 
+polygon = Polygon(test_geojson[0]["coordinates"][0])
+polygon_gdf = gpd.GeoDataFrame(geometry=[polygon])
+# polygon_gdf = gpd.read_file(geojson_path + file) 
 polygon_gdf.crs = "EPSG:4326"  # Assuming WGS84
 # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
+polygon_gdf_reprojected = polygon_gdf.to_crs(b2_src_20.crs)
 
-# %% try clipping
+# %% clipping all bands
 
-polygon_gdf_reprojected = polygon_gdf.to_crs(b2_src.crs)
+clipped_b1, transform_b1 = mask(b1_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b2, transform_b2 = mask(b2_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b3, transform_b3 = mask(b3_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b4, transform_b4 = mask(b4_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b5, transform_b5 = mask(b5_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b6, transform_b6 = mask(b6_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b7, transform_b7 = mask(b7_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b8, transform_b8 = mask(b8A_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b11, transform_b11 = mask(b11_src_20, polygon_gdf_reprojected.geometry, crop=True)
+clipped_b12, transform_b12 = mask(b12_src_20, polygon_gdf_reprojected.geometry, crop=True)
 
-print(polygon_gdf_reprojected)
+arr_of_clipped = [clipped_b1, clipped_b2, clipped_b3, clipped_b4, clipped_b5, clipped_b6, clipped_b7, clipped_b8, clipped_b11, clipped_b12]
+print(clipped_b1)
 
-clipped_b2, transform_b2 = mask(b2_src, polygon_gdf_reprojected.geometry, crop=True)      
+#%% pembuatan dataset clipped
+output_arr = [[],[],[],[],[],[],[],[],[],[],[],[]]
+done_xy = False
 
-# %% clipping b3 & b4
-clipped_b3, transform_b3 = mask(b3_src, polygon_gdf_reprojected.geometry, crop=True)
-clipped_b4, transform_b4 = mask(b4_src, polygon_gdf_reprojected.geometry, crop=True)
+for band_idx in range(0, 10):
+    clip = arr_of_clipped[band_idx][0]
+    for row_idx in range(0,len(clip)):
+        clip_row = clip[row_idx]
+        for col_idx in range(0, len(clip_row)):
+            item = clip_row[col_idx]
+            if item != 0:                
+                output_arr[band_idx].append(item)
+                if not done_xy:
+                    output_arr[10].append(row_idx)
+                    output_arr[11].append(col_idx)
+                    
+    done_xy = True
+                
+    print(f"Band ke-{band_idx + 1} beres diclip")
+print("sudah selesai") 
 
-# %% testing print
-print(clipped_b2.max())
-print(clipped_b3.max())
-print(clipped_b4.max())
+#%% coba liat outputnya    
+output_filename = 'dataset_coba_prediksi'
+out_df = pd.DataFrame({'B1': output_arr[0], 'B2': output_arr[1], 'B3': output_arr[2], 'B4': output_arr[3], 'B5': output_arr[4], 'B6': output_arr[5], 'B7': output_arr[6], 'B8': output_arr[7], 'B11': output_arr[8], 'B12': output_arr[9], 'x': output_arr[10], 'y': output_arr[11]})
 
-print(clipped_b2.shape)
-
+out_df.to_excel(script_directory + '/coba_remapping/' + output_filename + ".xlsx", index=False)
 # %% show rgb
 
 normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 500
@@ -328,4 +361,6 @@ print(b2_flatten)
 out_df = pd.DataFrame({'B2': b2_flatten, 'B3': b3_flatten, 'B4': b4_flatten})
 
 out_df.to_excel('testing_output.xlsx', index=False)
+
+
 
