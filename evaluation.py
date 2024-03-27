@@ -65,7 +65,7 @@ def evaluation_function(prediction_array, truth_array, bands):
     print()
     
     
-#%% best variables
+#%% reset best variables
 
 band_air = []
 band_bangunan = []
@@ -134,4 +134,5 @@ print(f"{band_air} is the best for air, with f1 score: {f1_air_max * 100:.2f}%")
 print(f"{band_bangunan} is the best for bangunan, with f1 score: {f1_bangunan_max * 100:.2f}%")
 print(f"{band_area_hijau} is the best for area_hijau, with f1 score: {f1_area_hijau_max * 100:.2f}%")
 print(f"{band_weighted} is the best for overall, with f1 score: {best_weighted * 100:.2f}%")
+
 

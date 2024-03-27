@@ -259,7 +259,7 @@ done_output = False
 output_filename = 'dataset_satelit_latihan_20m'
 out_df = pd.DataFrame({'B1': B1_output, 'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'B5': B5_output, 'B6': B6_output, 'B7': B7_output, 'B8': B8A_output, 'B11': B11_output, 'B12': B12_output, 'jenis_lahan': labels_output})
 
-out_df.drop_duplicates()
+out_df = out_df.drop_duplicates()
 
 while not done_output:
     try:    
@@ -338,9 +338,9 @@ out_df = pd.DataFrame({'B1': output_arr[0], 'B2': output_arr[1], 'B3': output_ar
 out_df.to_excel(script_directory + '/coba_remapping/' + output_filename + ".xlsx", index=False)
 # %% show rgb
 
-normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 500
-normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 500
-normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 500
+normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 255
+normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 255
+normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 255
 
 print(normalized_b2.max())
 
@@ -363,4 +363,41 @@ out_df = pd.DataFrame({'B2': b2_flatten, 'B3': b3_flatten, 'B4': b4_flatten})
 out_df.to_excel('testing_output.xlsx', index=False)
 
 
+#%% PETAKAN KEMBALI KE 2d
+
+hasil_prediksi = pd.read_excel(script_directory +"/prediction_result/real_predict/prediction_result.xlsx")
+
+#%% print peta
+
+lahan = hasil_prediksi['jenis_lahan']
+x_all = hasil_prediksi['x']
+y_all = hasil_prediksi['y']
+
+hasil_b2 = clipped_b2[0].copy()
+hasil_b3 = clipped_b3[0].copy()
+hasil_b4 = clipped_b4[0].copy()
+
+
+pixel_count = hasil_prediksi.shape[0]
+for i in range(0, pixel_count):
+    x = x_all[i]
+    y = y_all[i]
+    if lahan[i] == 'bangunan':
+        hasil_b2[x][y] = 200
+        hasil_b3[x][y] = 0
+        hasil_b4[x][y] = 0
+    elif lahan[i] == 'area_hijau':
+        hasil_b2[x][y] = 0
+        hasil_b3[x][y] = 200
+        hasil_b4[x][y] = 0
+    else:
+        hasil_b2[x][y] = 0
+        hasil_b3[x][y] = 0
+        hasil_b4[x][y] = 200
+        
+
+rgb_image = np.dstack((hasil_b2, hasil_b3, hasil_b4)).astype(np.uint8)
+plt.figure(figsize=(12, 12))  # Set width to 10 inches, height to 6 inches
+plt.imshow(rgb_image)
+        
 
