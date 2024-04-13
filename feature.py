@@ -16,11 +16,14 @@ import random
 from sklearn.feature_selection import SelectKBest
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
+import numpy as np
+from scipy import stats
 
 
+script_directory = os.path.dirname(os.path.abspath(__file__))
 # %% dataset iris
 
-df = pd.read_excel("/Users/kevinchristian/Downloads/dataset_satelit_latihan_1.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/dataset_satelit_latihan_20m_1.xlsx")
 
 # %% visualisasi
 
@@ -64,23 +67,38 @@ def anova_test(features, target):
     anova_results = pd.DataFrame({'feature': features.columns, 'f_value': f_values, 'p_value': p_values})
     
     # sort berdasarkan p-value
-    anova_results = anova_results.sort_values(by='p_value', ascending=True)
+    anova_results = anova_results.sort_values(by='f_value', ascending=False)
     
     # print 5 fitur dengan p-value terendah
     print(anova_results.head())
     print()
     
-    
     alpha = 0.05
     
-    # memilih fitur berdasarkan p-value
-    selected_features = features.columns[anova_results['p_value'] < alpha]
+    # Mencetak hasil perbandingan antara nilai F dan nilai kritis F
+    for i, row in anova_results.iterrows():
+        f_crit = stats.f.ppf(1 - alpha, len(features.columns) - 1, len(features) - len(features.columns))
+        if row['f_value'] > f_crit:
+            print(f"Feature '{row['feature']}': F-value ({row['f_value']:.4f}) > F-critical ({f_crit:.4f}), significant.")
+        else:
+            print(f"Feature '{row['feature']}': F-value ({row['f_value']:.4f}) <= F-critical ({f_crit:.4f}), not significant.")
+    
+    print() 
+   
+    # Membuat larik boolean yang menunjukkan apakah nilai F lebih besar dari nilai kritis F
+    significant_f = anova_results['f_value'] > f_crit
+
+    # Memilih fitur yang memenuhi kriteria F-value > F-critical
+    selected_features = features.columns[significant_f]
+
     
     print("Selected features:", selected_features)
     print()
     
+    return selected_features
 
-anova_test(features, target)
+
+selected_features = anova_test(features, target)
 
 # model = ols('B4 ~ jenis_lahan',data=df).fit()
 # print(sm.stats.anova_lm(model).round(5))
@@ -104,7 +122,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 2
+k = 1
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
