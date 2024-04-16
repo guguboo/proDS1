@@ -122,7 +122,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 1
+k = 3
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")

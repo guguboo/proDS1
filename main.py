@@ -342,7 +342,6 @@ normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 255
 normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 255
 normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 255
 
-print(normalized_b2.max())
 
 rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)
 rgb_raw = np.dstack((clipped_b2[0], clipped_b3[0], clipped_b4[0]))
