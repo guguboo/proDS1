@@ -190,7 +190,7 @@ test_geojson=[{
 #         done_output = True
 #     except:
 #         output_counter += 1
-        
+
 #%% buat dataset labelled untuk resolusi 20m
 geojson_path = script_directory + "/geojson/"
 
@@ -232,18 +232,46 @@ for file_number in range(1, jumlah_labeled_file+1):
             x, y = point.x, point.y
             x_raster, y_raster = b1_src_20.index(x, y)
             
+            b1_around = 0
+            b2_around = 0
+            b3_around = 0
+            b4_around = 0
+            b5_around = 0
+            b6_around = 0
+            b7_around = 0
+            b8_around = 0
+            b11_around = 0
+            b12_around = 0
             
+            cnt = 0
+            for i in range(x_raster-1, x_raster+2):
+                for j in range(y_raster-1, y_raster+2):
+                    try:
+                        b2_around += B2_20[i][j]
+                        b1_around += B1_20[i][j]
+                        b3_around += B3_20[i][j]
+                        b4_around += B4_20[i][j]
+                        b5_around += B5_20[i][j]
+                        b6_around += B6_20[i][j]
+                        b7_around += B7_20[i][j]
+                        b8_around += B8A_20[i][j]
+                        b11_around += B11_20[i][j]
+                        b12_around += B12_20[i][j]
+                        
+                        cnt += 1
+                    except:
+                        ""
             try:
-                B1_output.append(B1_20[x_raster][y_raster])
-                B2_output.append(B2_20[x_raster][y_raster])
-                B3_output.append(B3_20[x_raster][y_raster])
-                B4_output.append(B4_20[x_raster][y_raster])
-                B5_output.append(B5_20[x_raster][y_raster])
-                B6_output.append(B6_20[x_raster][y_raster])
-                B7_output.append(B7_20[x_raster][y_raster])
-                B8A_output.append(B8A_20[x_raster][y_raster])
-                B11_output.append(B11_20[x_raster][y_raster])
-                B12_output.append(B12_20[x_raster][y_raster])
+                B1_output.append(b1_around / cnt)
+                B2_output.append(b2_around / cnt)
+                B3_output.append(b3_around / cnt)
+                B4_output.append(b4_around / cnt)
+                B5_output.append(b5_around / cnt)
+                B6_output.append(b6_around / cnt)
+                B7_output.append(b7_around / cnt)
+                B8A_output.append(b8_around / cnt)
+                B11_output.append(b11_around / cnt)
+                B12_output.append(b12_around / cnt)
                 labels_output.append(label)
             except:
                 out_of_bound_count += 1
@@ -251,22 +279,20 @@ for file_number in range(1, jumlah_labeled_file+1):
     print("koordinat2 yang out of bound :" + str(out_of_bound_count))
     print()
     
+
 #%% output ke excel
 
 
 output_counter = 1
 done_output = False
-output_filename = 'dataset_satelit_latihan_20m'
+output_filename = 'coba_coba_20m'
 out_df = pd.DataFrame({'B1': B1_output, 'B2': B2_output, 'B3': B3_output, 'B4': B4_output, 'B5': B5_output, 'B6': B6_output, 'B7': B7_output, 'B8': B8A_output, 'B11': B11_output, 'B12': B12_output, 'jenis_lahan': labels_output})
 
 out_df = out_df.drop_duplicates()
 
-while not done_output:
-    try:    
-        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
-        done_output = True
-    except:
-        output_counter += 1
+
+out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
+done_output = True
 
 
 

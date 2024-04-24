@@ -148,7 +148,7 @@ print("file excel dataset sudah berhasil dibuat..")
 
 #%% feature engineering
 
-df = pd.read_excel(script_directory + "/output_labelling/dataset_satelit_presentasi.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/coba_coba_20m_1.xlsx")
 
 #visualisasi anova
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
@@ -240,7 +240,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 3
+k = 5
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
 
@@ -251,11 +251,11 @@ plt.figure(figsize=(10,10))
 sns.heatmap(df_cor, annot=True)
 plt.show()
 
-feature_terpilih = ["B1", "B2", "B6", "B11"]
+feature_terpilih = ["B2", "B3", "B4", "B5", "B12"]
 
 #%% training
 
-train_df = pd.read_excel(script_directory + "/output_labelling/dataset_satelit_presentasi.xlsx")
+train_df = pd.read_excel(script_directory + "/output_labelling/coba_coba_20m_1.xlsx")
 
 def train(x_train, y_train):
     rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -271,7 +271,6 @@ def predict_real_data(rfc, data, x_coor, y_coor):
     return y_pred
 
 #%% lakukan training
-feature_terpilih = ["B1", "B2", "B6", "B11"]
 
 x = train_df[feature_terpilih]
 y = train_df['jenis_lahan']
