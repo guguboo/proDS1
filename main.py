@@ -229,6 +229,7 @@ for file_number in range(1, jumlah_labeled_file+1):
             label = "air"
             
         for point in multipoint_geometry.geoms:
+            
             x, y = point.x, point.y
             x_raster, y_raster = b1_src_20.index(x, y)
             
