@@ -62,7 +62,7 @@ grid_gdf.crs = "EPSG:4326"
 
 grid_gdf = grid_gdf.to_crs(b1_src_20.crs)
 
-print(grid_gdf.shape)
+# print(grid_gdf.shape)
 
 B1_min = []
 B1_mean = []
@@ -228,10 +228,7 @@ for index, row in grid_gdf.iterrows():
                 
         #%% output ke excel
 
-
-        output_counter = 1
-        done_output = False
-        output_filename = 'coba_coba_20m'
+        output_filename = 'dataset_grid_metode_1'
         out_df = pd.DataFrame({
             'B1_min': B1_min, 'B1_mean': B1_mean, 'B1_max': B1_max, 
             'B2_min': B2_min, 'B2_mean': B2_mean, 'B2_max': B2_max, 
@@ -248,9 +245,7 @@ for index, row in grid_gdf.iterrows():
         out_df = out_df.drop_duplicates()
 
 
-        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + "_" + str(output_counter) + ".xlsx", index=False)
-        done_output = True
-
+        out_df.to_excel(script_directory + '/output_labelling/' + output_filename + ".xlsx", index=False)
         
         
 # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])

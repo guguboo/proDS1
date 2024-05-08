@@ -75,7 +75,7 @@ def train(x, y, bands):
 
 # Load the data from the Excel file
 
-data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_20m_1.xlsx')
+data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
 
 
 data.groupby("jenis_lahan").count()

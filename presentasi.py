@@ -148,7 +148,7 @@ print("file excel dataset sudah berhasil dibuat..")
 
 #%% feature engineering
 
-df = pd.read_excel(script_directory + "/output_labelling/coba_coba_20m_1.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_metode_2.xlsx")
 
 #visualisasi anova
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
@@ -240,7 +240,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 5
+k = 7
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
 
@@ -251,11 +251,20 @@ plt.figure(figsize=(10,10))
 sns.heatmap(df_cor, annot=True)
 plt.show()
 
-feature_terpilih = ["B2", "B3", "B4", "B5", "B12"]
+#baseline dapet 88%
+feature_terpilih = ['B1_min', 'B1_mean', 'B2_mean', 'B4_min', 'B4_mean', 'B12_min',
+       'B12_mean', 'B12_max'] #93.8%
+coba_feature_2 = ['B4_min', 'B4_mean', 'B12_min', 'B12_mean', 'B12_max'] # 90.3%
+coba_feature_3 = ['B1_min', 'B4_min', 'B4_mean', 'B12_min', 'B12_mean', 'B12_max'] #95.16%
+coba_feature_4 = ['B1_min', 'B2_mean', 'B4_min', 'B4_mean', 'B12_min', 'B12_mean',
+       'B12_max'] #91.94%
 
+#baseline dpt 93.55%
+coba_metode2_1 = ['B1', 'B2', 'B4', 'B5', 'B12'] #88%
+coba_metode2_2 = ['B1', 'B2', 'B3', 'B4', 'B5', 'B11', 'B12'] #90.32%
 #%% training
 
-train_df = pd.read_excel(script_directory + "/output_labelling/coba_coba_20m_1.xlsx")
+train_df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_metode_2.xlsx")
 
 def train(x_train, y_train):
     rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -272,7 +281,8 @@ def predict_real_data(rfc, data, x_coor, y_coor):
 
 #%% lakukan training
 
-x = train_df[feature_terpilih]
+x = train_df.iloc[:, :-1]
+# x = train_df[coba_metode2_2]
 y = train_df['jenis_lahan']
     
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
@@ -286,11 +296,11 @@ y_actual = y_test
 
 results_df = pd.DataFrame({'Actual': y_actual, 'Predicted': y_prediction})
 
-results_df.to_excel(script_directory + '/prediction_result/presentasi/' + "prediksi_presentasi.xlsx", index=False)
+results_df.to_excel(script_directory + '/prediction_result/presentasi/' + "prediksi_grid.xlsx", index=False)
 
 #%% lakukan evaluasi
 
-prediction_df = pd.read_excel(script_directory + "/prediction_result/presentasi/prediksi_presentasi.xlsx")
+prediction_df = pd.read_excel(script_directory + "/prediction_result/presentasi/prediksi_grid.xlsx")
 
 def evaluation_function(prediction_array, truth_array):
 
