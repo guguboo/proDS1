@@ -109,17 +109,17 @@ def train_only(x_train, y_train):
 def predict_only(rfc, data, x_coor, y_coor):
     y_pred = rfc.predict(data)
     results_df = pd.DataFrame({'x': x_coor, 'y': y_coor, 'jenis_lahan': y_pred})
-    nama_file = "prediction_result"
+    nama_file = "hasil_prediksi_grid_2"
     results_df.to_excel(script_directory + '/prediction_result/real_predict/' + nama_file + '.xlsx', index=False)
 
     return y_pred
 
 #%% KODE TRAINING COBA 20m
 
-training_data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_20m_1.xlsx')
+training_data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
 
 #data kalo baseline yg ini
-x = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B11', 'B12']
+x = ['B1', 'B2', 'B6', 'B8', 'B12']
 
 x_train = training_data[x]
 y_train = training_data['jenis_lahan']
@@ -128,12 +128,12 @@ rfc = train_only(x_train, y_train)
 
 #%% prediksi sesungguhnya
 
-predict_data = pd.read_excel(script_directory + '/coba_remapping' + '/dataset_coba_prediksi.xlsx')
+predict_data = pd.read_excel(script_directory + '/coba_remapping' + '/dataset_prediksi_grid.xlsx')
 print(predict_data)
 
 
 #%% prediksi
-bands = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B11', 'B12']
+bands = ['B1', 'B2', 'B6', 'B8', 'B12']
 
 hasil = predict_only(rfc, predict_data[bands], predict_data['x'], predict_data['y'])
 
