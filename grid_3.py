@@ -396,7 +396,7 @@ for i in range(0, pixel_count):
         for k in range(y, y + 2):
             if lahan[i] == 'bangunan':
                 hasil_b2[j][k] = 200
-                hasil_b3[j][k] = 0
+                hasil_b3[j][k] = 100
                 hasil_b4[j][k] = 0
             elif lahan[i] == 'area_hijau':
                 hasil_b2[j][k] = 0
