@@ -60,13 +60,9 @@ B11_20 = b11_src_20.read(1)
 B12_20 = b12_src_20.read(1)
 
 #%%
-grid_dir = script_directory + "/geojson/label_by_grid_1.geojson"
+grid_dir = script_directory + "/geojson/label_by_grid_"
 
-grid_gdf = gpd.read_file(grid_dir) 
-grid_gdf.crs = "EPSG:4326"  
-
-grid_gdf = grid_gdf.to_crs(b1_src_20.crs)
-band_list = [B1_20, B2_20, B3_20, B4_20, B5_20, B6_20, B7_20, B8A_20, B11_20, B12_20]
+jumlah_labeled_file = 2
 
 B1 = []
 B2 = []
@@ -80,104 +76,115 @@ B11 = []
 B12 = []
 label_output = []
 
-label = ""
-max_num = 9999999999
 
-# print(band_list[0][1])
-
-for index, row in grid_gdf.iterrows():
-    multipoly = row['geometry']
+for i in range(1, jumlah_labeled_file+1):
+    grid_gdf = gpd.read_file(grid_dir+str(i)+".geojson") 
+    grid_gdf.crs = "EPSG:4326"  
     
-    if index == 0:
-        label = "bangunan"
-    elif index == 1:
-        label = "area_hijau"
-    else:
-        label = "air"
-        
-    for poly in multipoly.geoms:
-        
-        cluster_input = []
-        # print(poly)
-        coords = poly.exterior.coords
-        
+    grid_gdf = grid_gdf.to_crs(b1_src_20.crs)
+    band_list = [B1_20, B2_20, B3_20, B4_20, B5_20, B6_20, B7_20, B8A_20, B11_20, B12_20]
     
-        xmin, ymin = max_num, max_num
-        xmax, ymax = 0, 0
+    
+    label = ""
+    max_num = 9999999999
+    
+    # print(band_list[0][1])
+    
+    for index, row in grid_gdf.iterrows():
+        multipoly = row['geometry']
         
-        for point in coords:
-            # print(point)
-            x_raster, y_raster = b1_src_20.index(point[0], point[1])
-            if(x_raster < xmin):
-                xmin = x_raster
-            if(x_raster > xmax):
-                xmax = x_raster
-            if(y_raster < ymin):
-                ymin = y_raster
-            if(y_raster > ymax):
-                ymax = y_raster
-
-        if (xmax - xmin <= 5 and ymax - ymin <= 5):
-            # print(xmax-xmin)
-            # print(ymax-ymin)
-            for i in range(xmin, xmax+1):
-                for j in range(ymin, ymax+1):
-                    temp = []
-                    for k in range(0, 10):
-                        try:
-                            temp.append(band_list[k][i][j])
-                        except:
-                            print("index out of bound")
-                    
-                    cluster_input.append(temp)
-        # print(cluster_input)
-        # print("process cluster")
+        if index == 0:
+            label = "bangunan"
+        elif index == 1:
+            label = "area_hijau"
+        else:
+            label = "air"
+            
+        for poly in multipoly.geoms:
+            
+            cluster_input = []
+            # print(poly)
+            coords = poly.exterior.coords
+            
         
-        #coba clustering
-        #tentukan k dulu menggunakan silhouette score
-        silhouette_scores = []
-        max_k = 5  
-        
-        for k in range(2, max_k + 1):   
-            kmeans = KMeans(n_clusters=k, random_state=42)
-            kmeans.fit(cluster_input)
-            labels = kmeans.labels_
-            score = silhouette_score(cluster_input, labels)
-            silhouette_scores.append(score)
-        
-        optimal_k = np.argmax(silhouette_scores) + 2
-        
-        band_sum = [0,0,0,0,0,0,0,0,0,0]
-        
-        #setelah dpt k_optimal, pakai untuk clustering
-        kmeans = KMeans(n_clusters=k, random_state=42)
-        labels = kmeans.fit_predict(cluster_input)
-        # print(len(labels))
-        # print(len(cluster_input))
-        majority = statistics.mode(labels)
-        cnt = 0
-        
-        # print(len(labels))
-        
-        for i in range(0, len(labels)):
-            if labels[i] == majority:
-                curr_data = cluster_input[i]
-                for j in range(0, 10):
-                    # print(curr_data)
-                    band_sum[j] += curr_data[j]
-                cnt+=1
-        
-        B1.append(band_sum[0]/cnt)
-        B2.append(band_sum[1]/cnt)
-        B3.append(band_sum[2]/cnt)
-        B4.append(band_sum[3]/cnt)
-        B5.append(band_sum[4]/cnt)
-        B6.append(band_sum[5]/cnt)
-        B7.append(band_sum[6]/cnt)
-        B8.append(band_sum[7]/cnt)
-        B11.append(band_sum[8]/cnt)
-        B12.append(band_sum[9]/cnt)
-        label_output.append(label)
+            xmin, ymin = max_num, max_num
+            xmax, ymax = 0, 0
+            
+            for point in coords:
+                # print(point)
+                x_raster, y_raster = b1_src_20.index(point[0], point[1])
+                if(x_raster < xmin):
+                    xmin = x_raster
+                if(x_raster > xmax):
+                    xmax = x_raster
+                if(y_raster < ymin):
+                    ymin = y_raster
+                if(y_raster > ymax):
+                    ymax = y_raster
+    
+            selisihX = xmax-xmin
+            selisihY = ymax-ymin
+            
+            if (selisihX <= 5 and selisihX >= 3 and selisihY <= 5 and selisihY >= 3):
+                for i in range(xmin, xmax+1):
+                    for j in range(ymin, ymax+1):
+                        temp = []
+                        for k in range(0, 10):
+                            try:
+                                temp.append(band_list[k][i][j])
+                            except:
+                                print("index out of bound")
+                        
+                        cluster_input.append(temp)
+                        # print(selisihX, selisihY)
+                # print(cluster_input)
+                # print("process cluster")
+                
+                #coba clustering
+                #tentukan k dulu menggunakan silhouette score
+                silhouette_scores = []
+                max_k = 5
+                
+                for k in range(2, max_k + 1):   
+                    kmeans = KMeans(n_clusters=k, random_state=42)
+                    kmeans.fit(cluster_input)
+                    labels = kmeans.labels_
+                    score = silhouette_score(cluster_input, labels)
+                    silhouette_scores.append(score)
+                
+                optimal_k = np.argmax(silhouette_scores) + 2
+                
+                band_sum = [0,0,0,0,0,0,0,0,0,0]
+                
+                #setelah dpt k_optimal, pakai untuk clustering
+                kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+                labels = kmeans.fit_predict(cluster_input)
+                # print(len(labels))
+                # print(len(cluster_input))
+                majority = statistics.mode(labels)
+                cnt = 0
+                
+                # print(len(labels))
+                
+                for i in range(0, len(labels)):
+                    if labels[i] == majority:
+                        curr_data = cluster_input[i]
+                        for j in range(0, 10):
+                            # print(curr_data)
+                            band_sum[j] += curr_data[j]
+                        cnt+=1
+                
+                B1.append(band_sum[0]/cnt)
+                B2.append(band_sum[1]/cnt)
+                B3.append(band_sum[2]/cnt)
+                B4.append(band_sum[3]/cnt)
+                B5.append(band_sum[4]/cnt)
+                B6.append(band_sum[5]/cnt)
+                B7.append(band_sum[6]/cnt)
+                B8.append(band_sum[7]/cnt)
+                B11.append(band_sum[8]/cnt)
+                B12.append(band_sum[9]/cnt)
+                label_output.append(label)
         
         
 #%% output ke excel
@@ -199,6 +206,7 @@ out_df = pd.DataFrame({
 
 out_df = out_df.drop_duplicates()
 
+print(out_df.shape)
 
 out_df.to_excel(script_directory + '/output_labelling/' + output_filename + ".xlsx", index=False)
         
@@ -357,7 +365,7 @@ hasil_prediksi = pd.read_excel(script_directory +"/prediction_result/real_predic
 # %% show rgb
 
 normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 490
-normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 450
+normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 460
 normalized_b4 = clipped_b4[0] / clipped_b4[0].max() * 510
 
 

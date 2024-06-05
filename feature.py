@@ -23,7 +23,7 @@ from scipy import stats
 script_directory = os.path.dirname(os.path.abspath(__file__))
 # %% dataset iris
 
-df = pd.read_excel(script_directory + "/output_labelling/dataset_satelit_latihan_20m_1.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_metode_2.xlsx")
 
 # %% visualisasi
 
@@ -122,7 +122,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 3
+k = 6
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")

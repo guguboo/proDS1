@@ -21,12 +21,12 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Load the data from the Excel file
 
-data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_satelit_latihan_20m_1.xlsx')
+data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
 
 # Split the data into features (spectral bands) and target label
 
 
-X = data[['B2', 'B4']]  # Features: Spectral bands B2, B3, B4
+X = data[['B1', 'B2', 'B4', 'B5', 'B11', 'B12']]  # Features: Spectral bands B2, B3, B4
 # X = data[['B4', 'B6', 'B7', 'B8', 'B11', 'B12']]  
 
 y = data['jenis_lahan']        # Target label: Land cover types
@@ -57,7 +57,7 @@ def train(x, y, bands):
     
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
-    rf_classifier = RandomForestClassifier(n_estimators=75, random_state=42)
+    rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
     rf_classifier.fit(X_train, y_train)
 
@@ -119,7 +119,8 @@ def predict_only(rfc, data, x_coor, y_coor):
 training_data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
 
 #data kalo baseline yg ini
-x = ['B1', 'B2', 'B6', 'B8', 'B12']
+# x = ['B1', 'B2', 'B6', 'B8', 'B12']
+x = ['B1', 'B2', 'B3', 'B4', 'B11', 'B12'] 
 
 x_train = training_data[x]
 y_train = training_data['jenis_lahan']
@@ -133,7 +134,7 @@ print(predict_data)
 
 
 #%% prediksi
-bands = ['B1', 'B2', 'B6', 'B8', 'B12']
+bands = ['B1', 'B2', 'B3', 'B4', 'B11', 'B12'] 
 
 hasil = predict_only(rfc, predict_data[bands], predict_data['x'], predict_data['y'])
 
