@@ -21,7 +21,7 @@ df = pd.read_excel(script_directory + "/prediction_results.xlsx")
 
 prediction_array = df['Predicted']
 true_array = df['Actual']
-# evaluation_function(prediction_array, true_array, [""])
+evaluation_function(prediction_array, true_array, [""])
 
 #%% function buat matrix (andrea version)
 

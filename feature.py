@@ -14,8 +14,6 @@ import seaborn as sns
 from sklearn.feature_selection import f_classif
 import random
 from sklearn.feature_selection import SelectKBest
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
 import numpy as np
 from scipy import stats
 
@@ -23,7 +21,7 @@ from scipy import stats
 script_directory = os.path.dirname(os.path.abspath(__file__))
 # %% dataset iris
 
-df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_metode_2.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_statistik_2x2.xlsx")
 
 # %% visualisasi
 
@@ -122,7 +120,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 6
+k = 10
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
