@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jun 19 22:30:27 2024
+
+@author: MSI
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Tue May  7 14:35:35 2024
 
 @author: MSI
@@ -14,11 +22,9 @@ import statistics
 import os
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-from sklearn import metrics
 import pandas as pd
 from shapely import Polygon
 import geopandas as gpd
-import rasterio.crs as CRS
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,13 +33,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 from itertools import combinations
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-import matplotlib.pyplot as plt
-from itertools import combinations
 import seaborn as sns
+from sklearn.feature_selection import f_classif
+from sklearn.feature_selection import SelectKBest
+from scipy import stats
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
 
-#%% dataset load resolusi 20m
+#%% import dataset
 b1_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B01_20m.jp2'
 b2_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B02_20m.jp2'
 b3_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B03_20m.jp2'
@@ -67,7 +74,7 @@ B8A_20 = b8A_src_20.read(1)
 B11_20 = b11_src_20.read(1)
 B12_20 = b12_src_20.read(1)
 
-#%%
+#%% LABELLING
 grid_dir = script_directory + "/geojson/label_by_grid_"
 
 jumlah_labeled_file = 2
@@ -197,7 +204,7 @@ for i in range(1, jumlah_labeled_file+1):
         
 #%% output ke excel
 
-output_filename = 'dataset_grid_metode_2'
+output_filename = 'dataset_presentasi_2'
 out_df = pd.DataFrame({
     'B1': B1,
     'B2': B2,
@@ -216,29 +223,83 @@ out_df = out_df.drop_duplicates()
 
 print(out_df.shape)
 
-out_df.to_excel(script_directory + '/output_labelling/' + output_filename + ".xlsx", index=False)
+out_df.to_excel(script_directory + '/output_labelling/presentasi/' + output_filename + ".xlsx", index=False)
         
-#%% KODE TRAINING (MARK VERSION)
 
-# Load the data from the Excel file
+#%% UJI ANOVA
 
-data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
+features = out_df.iloc[:, :-1]  # semua kolom kecuali kolom target
+target = out_df.iloc[:, -1] 
 
-# Split the data into features (spectral bands) and target label
+def anova_test(features, target):
+    # hitung F-value, p-value untuk setiap fitur
+    f_values, p_values = f_classif(features, target)
+    
+    # buat dataframe untuk menyimpan hasil perhitungan
+    anova_results = pd.DataFrame({'feature': features.columns, 'f_value': f_values, 'p_value': p_values})
+    
+    # sort berdasarkan p-value
+    anova_results = anova_results.sort_values(by='f_value', ascending=False)
+    
+    # print 5 fitur dengan p-value terendah
+    print(anova_results.head())
+    print()
+    
+    alpha = 0.05
+    
+    # Mencetak hasil perbandingan antara nilai F dan nilai kritis F
+    for i, row in anova_results.iterrows():
+        f_crit = stats.f.ppf(1 - alpha, len(features.columns) - 1, len(features) - len(features.columns))
+        if row['f_value'] > f_crit:
+            print(f"Feature '{row['feature']}': F-value ({row['f_value']:.4f}) > F-critical ({f_crit:.4f}), significant.")
+        else:
+            print(f"Feature '{row['feature']}': F-value ({row['f_value']:.4f}) <= F-critical ({f_crit:.4f}), not significant.")
+    
+    print() 
+   
+    # Membuat larik boolean yang menunjukkan apakah nilai F lebih besar dari nilai kritis F
+    significant_f = anova_results['f_value'] > f_crit
+
+    # Memilih fitur yang memenuhi kriteria F-value > F-critical
+    selected_features = features.columns[significant_f]
+
+    
+    return selected_features
 
 
-# X = data[['B1', 'B2', 'B4', 'B5', 'B11', 'B12']]  # Features: Spectral bands B2, B3, B4
-# X = data[['B4', 'B6', 'B7', 'B8', 'B11', 'B12']]
-X = data[['B1', 'B2', 'B3', 'B4', 'B5', 'B12']] # metode 2
-# X = data[['B1', 'B2', 'B3', 'B4', 'B6', 'B12']] #metode 2x2 cluster
+selected_features = anova_test(features, target)
 
-# X = data[['B1_min', 'B1_mean', 'B1_max', 'B2_mean', 'B4_min', 'B4_mean', 'B4_max',
-#        'B12_min', 'B12_mean', 'B12_max']]
+def select_k_best(features, target, k):
+    # Membuat objek SelectKBest
+    selector = SelectKBest(score_func=f_classif, k=k)
+    
+    # Fit dan transformasi fitur
+    selector.fit_transform(features, target)
+    
+    # Mendapatkan indeks fitur terpilih
+    selected_indices = selector.get_support(indices=True)
+    
+    # Mendapatkan nama fitur terpilih
+    selected_features = features.columns[selected_indices]
+    
+    return selected_features
 
-y = data['jenis_lahan']        # Target label: Land cover types
+# Jumlah fitur yang ingin dipilih
+k = 6
+
+selected_features_k_best = select_k_best(features, target, k)
+print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
+
+#%% TRAINING
+
+fitur_terpilih = ['B1', 'B2', 'B3', 'B4', 'B5', 'B12']
+
+data = out_df
+X = data[fitur_terpilih] 
+y = data['jenis_lahan']        
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Initialize the Random Forest Classifier
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -253,17 +314,11 @@ y_pred = rf_classifier.predict(X_test)
 results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
 
 # Export the results DataFrame to an Excel file
-results_df.to_excel(script_directory + '/prediction_results.xlsx', index=False)
+results_df.to_excel(script_directory + '/prediction_result/presentasi2/prediction_presentasi.xlsx', index=False)
 
-#%% read excel dan masukan ke variabel (CONTOH)
+#%% EVALUASI
 
-df = pd.read_excel(script_directory + "/prediction_results.xlsx")
-
-prediction_array = df['Predicted']
-true_array = df['Actual']
-
-
-#%% function buat matrix (andrea version)
+df = results_df
 
 def evaluation_function(prediction_array, truth_array, bands):
     
@@ -304,9 +359,13 @@ def evaluation_function(prediction_array, truth_array, bands):
     print("F1 Score (weighted): {:.2f}%".format(f1_weighted * 100))
     print()
 
-evaluation_function(prediction_array, true_array, [""])
-#%% coba di data asli
 
+prediction_array = df['Predicted']
+true_array = df['Actual']
+
+evaluation_function(prediction_array, true_array, [""])
+
+#%% CLIP DATASETNYA
 test_geojson=[{
     "type": "Polygon",
     "coordinates": [
@@ -340,7 +399,7 @@ test_geojson=[{
     }]
 
 
-print(test_geojson[0]["coordinates"][0])
+# print(test_geojson[0]["coordinates"][0])
 
 polygon = Polygon(test_geojson[0]["coordinates"][0])
 polygon_gdf = gpd.GeoDataFrame(geometry=[polygon])
@@ -349,7 +408,6 @@ polygon_gdf.crs = "EPSG:4326"  # Assuming WGS84
 # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
 polygon_gdf_reprojected = polygon_gdf.to_crs(b2_src_20.crs)
 
-# %% clipping all bands
 
 clipped_b1, transform_b1 = mask(b1_src_20, polygon_gdf_reprojected.geometry, crop=True)
 clipped_b2, transform_b2 = mask(b2_src_20, polygon_gdf_reprojected.geometry, crop=True)
@@ -365,13 +423,12 @@ clipped_b12, transform_b12 = mask(b12_src_20, polygon_gdf_reprojected.geometry, 
 arr_of_clipped = [clipped_b1, clipped_b2, clipped_b3, clipped_b4, clipped_b5, clipped_b6, clipped_b7, clipped_b8, clipped_b11, clipped_b12]
 print(clipped_b1)
 
-#%%
 
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
-#%% pembuatan dataset
+#%% PEMBUATAN DATASET TIDAK BERLABEL DARI DATA SATELIT
 
 output_arr = [[],[],[],[],[],[],[],[],[],[],[], []]
 done_xy = False
@@ -447,7 +504,7 @@ for row_idx in range(0, x_size - 3, 3):
 print("sudah selesai..")
 #%% output ke excel
 
-output_filename = 'dataset_prediksi_grid_3x3'
+output_filename = 'dataset_prediksi_presentasi_2'
 out_df = pd.DataFrame({'B1': output_arr[0], 'B2': output_arr[1], 'B3': output_arr[2], 'B4': output_arr[3], 'B5': output_arr[4], 'B6': output_arr[5], 'B7': output_arr[6], 'B8': output_arr[7], 'B11': output_arr[8], 'B12': output_arr[9], 'x': output_arr[10], 'y': output_arr[11]})
 
 out_df.to_excel(script_directory + '/coba_remapping/' + output_filename + ".xlsx", index=False)
@@ -459,50 +516,33 @@ def train_only(x_train, y_train):
     rf_classifier.fit(x_train, y_train)
     return rf_classifier
 
-#%% PREDIKSI ONLY
-
 def predict_only(rfc, data, x_coor, y_coor):
     y_pred = rfc.predict(data)
     results_df = pd.DataFrame({'x': x_coor, 'y': y_coor, 'jenis_lahan': y_pred})
-    nama_file = "hasil_prediksi_grid_3x3"
+    nama_file = "hasil_prediksi_presentasi"
     results_df.to_excel(script_directory + '/prediction_result/real_predict/' + nama_file + '.xlsx', index=False)
 
     return y_pred
 
 #%% KODE TRAINING COBA 20m
 
-training_data = pd.read_excel(script_directory + '/output_labelling' + '/dataset_grid_metode_2.xlsx')
+training_data = pd.read_excel(script_directory + '/output_labelling/presentasi' + '/dataset_presentasi_2.xlsx')
 
-#data kalo baseline yg ini
-# x = ['B1', 'B2', 'B6', 'B8', 'B12']
-# x = ['B1', 'B2', 'B3', 'B4', 'B6', 'B12'] #metode 2x2 cluster
-# x = ['B1_min', 'B1_mean', 'B2_mean', 'B3_mean', 'B4_min', 'B4_mean',
-#         'B4_max', 'B12_min', 'B12_mean', 'B12_max']
-
-x = ['B1', 'B2', 'B3', 'B4', 'B5', 'B12'] # metode 2
-# x = ['B2_mean', 'B4_mean', 'B12_min', 'B12_mean', 'B12_max']
-x_train = training_data[x]
+x_train = training_data[fitur_terpilih]
 y_train = training_data['jenis_lahan']
     
 rfc = train_only(x_train, y_train)
 
-#%% prediksi sesungguhnya
+predict_data = pd.read_excel(script_directory + '/coba_remapping' + '/dataset_prediksi_presentasi_2.xlsx')
 
-predict_data = pd.read_excel(script_directory + '/coba_remapping' + '/dataset_prediksi_grid_3x3.xlsx')
-print(predict_data)
-
-
-#%% prediksi
-
-hasil = predict_only(rfc, predict_data[x], predict_data['x'], predict_data['y'])
+hasil = predict_only(rfc, predict_data[fitur_terpilih], predict_data['x'], predict_data['y'])
 
 print(hasil)
 
 #%% PETAKAN KEMBALI KE 2d
 
-hasil_prediksi = pd.read_excel(script_directory +"/prediction_result/real_predict/hasil_prediksi_grid_3x3.xlsx")
+hasil_prediksi = pd.read_excel(script_directory +"/prediction_result/real_predict/hasil_prediksi_presentasi.xlsx")
 
-# %% show rgb
 
 normalized_b2 = clipped_b2[0] / clipped_b2[0].max() * 490
 normalized_b3 = clipped_b3[0] / clipped_b3[0].max() * 460

@@ -21,7 +21,7 @@ df = pd.read_excel(script_directory + "/prediction_results.xlsx")
 
 prediction_array = df['Predicted']
 true_array = df['Actual']
-evaluation_function(prediction_array, true_array, [""])
+
 
 #%% function buat matrix (andrea version)
 
@@ -63,7 +63,8 @@ def evaluation_function(prediction_array, truth_array, bands):
     f1_weighted = f1_score(truth_array, prediction_array, average='weighted')
     print("F1 Score (weighted): {:.2f}%".format(f1_weighted * 100))
     print()
-    
+
+evaluation_function(prediction_array, true_array, [""])
     
 #%% reset best variables
 

@@ -21,7 +21,7 @@ from scipy import stats
 script_directory = os.path.dirname(os.path.abspath(__file__))
 # %% dataset iris
 
-df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_statistik_2x2.xlsx")
+df = pd.read_excel(script_directory + "/output_labelling/dataset_grid_metode_2.xlsx")
 
 # %% visualisasi
 
@@ -56,6 +56,8 @@ for feature in features.columns:
         plt.show()
 
 # %% anova test
+features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
+target = df.iloc[:, -1] 
 
 def anova_test(features, target):
     # hitung F-value, p-value untuk setiap fitur
@@ -120,7 +122,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 10
+k = 8
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")
