@@ -504,7 +504,7 @@ for row_idx in range(0, x_size - 3, 3):
 print("sudah selesai..")
 #%% output ke excel
 
-output_filename = 'dataset_prediksi_presentasi_2'
+output_filename = 'dataset_prediksi_presentasi_3'
 out_df = pd.DataFrame({'B1': output_arr[0], 'B2': output_arr[1], 'B3': output_arr[2], 'B4': output_arr[3], 'B5': output_arr[4], 'B6': output_arr[5], 'B7': output_arr[6], 'B8': output_arr[7], 'B11': output_arr[8], 'B12': output_arr[9], 'x': output_arr[10], 'y': output_arr[11]})
 
 out_df.to_excel(script_directory + '/coba_remapping/' + output_filename + ".xlsx", index=False)
