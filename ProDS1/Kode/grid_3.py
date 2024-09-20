@@ -22,8 +22,10 @@ import rasterio.crs as CRS
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
+import addFeature as af
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
+script_directory =  os.path.dirname(script_directory)
 
 #%% dataset load resolusi 20m
 b1_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B01_20m.jp2'
@@ -74,6 +76,8 @@ B7 = []
 B8 = []
 B11 = []
 B12 = []
+NDVI = []
+EVI = []
 label_output = []
 
 
@@ -184,6 +188,8 @@ for i in range(1, jumlah_labeled_file+1):
                 B8.append(band_sum[7]/cnt)
                 B11.append(band_sum[8]/cnt)
                 B12.append(band_sum[9]/cnt)
+                NDVI.append(af.addNDVI(band_sum[3]/cnt, band_sum[7]/cnt))
+                EVI.append(af.addEVI(band_sum[1]/cnt, band_sum[3]/cnt, band_sum[7]/cnt))
                 label_output.append(label)
         
         
@@ -201,6 +207,8 @@ out_df = pd.DataFrame({
     'B8': B8,
     'B11': B11,
     'B12': B12,
+    'NDVI': NDVI,
+    'EVI': EVI,
     'jenis_lahan': label_output
     })
 
