@@ -17,8 +17,11 @@ import rasterio.crs as CRS
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
 import numpy as np
+import addFeature as af
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
+script_directory =  os.path.dirname(script_directory)
+
 
 #%% dataset load resolusi 20m
 b1_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B01_20m.jp2'
@@ -89,6 +92,12 @@ B11_max = []
 B12_min = []
 B12_mean = []
 B12_max = []
+NDVI_min = []
+NDVI_max = []
+NDVI_mean = []
+EVI_min = []
+EVI_max = []
+EVI_mean = []
 labels_output = []
 
 for i in range(1,labelled+1):
@@ -228,6 +237,12 @@ for i in range(1,labelled+1):
             B12_min.append(b12_min)
             B12_mean.append(b12_sum / cnt)
             B12_max.append(b12_max)  
+            NDVI_min.append(af.addNDVI(b4_min, b8_min))
+            NDVI_mean.append(af.addNDVI(b4_sum/cnt, b8_sum/cnt))
+            NDVI_max.append(af.addNDVI(b4_max, b8_max))
+            EVI_min.append(af.addEVI(b2_min,b4_min, b8_min))
+            EVI_mean.append(af.addEVI(b2_sum/cnt,b4_sum/cnt, b8_sum/cnt))
+            EVI_max.append(af.addEVI(b2_max,b4_max, b8_max))
             labels_output.append(label)
                 
         #%% output ke excel
@@ -243,7 +258,9 @@ for i in range(1,labelled+1):
             'B7_min': B7_min, 'B7_mean': B7_mean, 'B7_max': B7_max, 
             'B8_min': B8_min, 'B8_mean': B8_mean, 'B8_max': B8_max, 
             'B11_min': B11_min, 'B11_mean': B11_mean, 'B11_max': B11_max, 
-            'B12_min': B12_min, 'B12_mean': B12_mean, 'B12_max': B12_max,             
+            'B12_min': B12_min, 'B12_mean': B12_mean, 'B12_max': B12_max, 
+            'NDVI_min': NDVI_min, 'NDVI_mean': NDVI_mean, 'NDVI_max': NDVI_max,       
+            'EVI_min': EVI_min, 'EVI_mean': EVI_mean, 'EVI_max': EVI_max, 
             'jenis_lahan': labels_output})
 
         out_df = out_df.drop_duplicates()
@@ -347,6 +364,12 @@ B11_max = []
 B12_min = []
 B12_mean = []
 B12_max = []
+NDVI_min = []
+NDVI_max = []
+NDVI_mean = []
+EVI_min = []
+EVI_max = []
+EVI_mean = []
 x = []
 y = []
 
@@ -449,6 +472,12 @@ for row_idx in range(0, x_size - 3, 3):
             B12_min.append(b12_min)
             B12_mean.append(b12_sum / cnt)
             B12_max.append(b12_max)  
+            NDVI_min.append(af.addNDVI(b4_min, b8_min))
+            NDVI_mean.append(af.addNDVI(b4_sum/cnt, b8_sum/cnt))
+            NDVI_max.append(af.addNDVI(b4_max, b8_max))
+            EVI_min.append(af.addEVI(b2_min,b4_min, b8_min))
+            EVI_mean.append(af.addEVI(b2_sum/cnt,b4_sum/cnt, b8_sum/cnt))
+            EVI_max.append(af.addEVI(b2_max,b4_max, b8_max))
             x.append(row_idx)
             y.append(col_idx)
             print(f"row ke-{i} col ke-{j}")
@@ -465,6 +494,8 @@ out_df = pd.DataFrame({
     'B8_min': B8_min, 'B8_mean': B8_mean, 'B8_max': B8_max, 
     'B11_min': B11_min, 'B11_mean': B11_mean, 'B11_max': B11_max, 
     'B12_min': B12_min, 'B12_mean': B12_mean, 'B12_max': B12_max,
+    'NDVI_min': NDVI_min, 'NDVI_mean': NDVI_mean, 'NDVI_max': NDVI_max,  
+    'EVI_min': EVI_min, 'EVI_mean': EVI_mean, 'EVI_max': EVI_max, 
     'x': x, 'y': y
     })
 
