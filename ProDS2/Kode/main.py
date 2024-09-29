@@ -14,7 +14,7 @@ Created on Tue May  7 14:35:35 2024
 @author: MSI
 """
 
-#%% GRID MAIN
+#%% import dataset
 
 import rasterio
 import statistics
@@ -30,204 +30,113 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
-from itertools import combinations
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+# from sklearn.metrics import classification_report, accuracy_score
+# from itertools import combinations
+# from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import seaborn as sns
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import SelectKBest
 from scipy import stats
 
-script_directory = os.path.dirname(os.path.abspath(__file__))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+#%%
 
-#%% import dataset
+bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-bands_src = []
-b1_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B01_20m.jp2'
-b2_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B02_20m.jp2'
-b3_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B03_20m.jp2'
-b4_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B04_20m.jp2'
-b5_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B05_20m.jp2'
-b6_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B06_20m.jp2'
-b7_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B07_20m.jp2'
-b8A_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B8A_20m.jp2'
-b11_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B11_20m.jp2'
-b12_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B12_20m.jp2'
+band_path = parent_dir + '/Data/satelit/21082024/'
 
-b1_src_20 = rasterio.open(b1_path_20)
-b2_src_20 = rasterio.open(b2_path_20)
-b3_src_20 = rasterio.open(b3_path_20)
-b4_src_20 = rasterio.open(b4_path_20)
-b5_src_20 = rasterio.open(b5_path_20)
-b6_src_20 = rasterio.open(b6_path_20)
-b7_src_20 = rasterio.open(b7_path_20)
-b8A_src_20 = rasterio.open(b8A_path_20)
-b11_src_20 = rasterio.open(b11_path_20)
-b12_src_20 = rasterio.open(b12_path_20)
+for i in range(1, 13):
+    if i != 9 and i != 10:
+        curr_band = rasterio.open(band_path + "B" + str(i) + ".jp2")
+        bands_src[i] = curr_band
 
-B1_20 = b1_src_20.read(1)
-B2_20 = b2_src_20.read(1)
-B3_20 = b3_src_20.read(1)
-B4_20 = b4_src_20.read(1)
-B5_20 = b5_src_20.read(1)
-B6_20 = b6_src_20.read(1)
-B7_20 = b7_src_20.read(1)
-B8A_20 = b8A_src_20.read(1)
-B11_20 = b11_src_20.read(1)
-B12_20 = b12_src_20.read(1)
+print("Successfully Read Bands Src")
 
+#%% src to raster
+
+bands_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+for i in range(1, 13):
+    if i != 9 and i != 10:
+        bands_list[i] = bands_src[i].read(1)
+
+print("Successfully Read Bands Raster")
 #%% LABELLING
-grid_dir = script_directory + "/geojson/label_by_grid_"
+label_andrea = parent_dir + "/Labeling/andrea_"
+n_andrea = 1
+class_andrea = ["crop", "agriculture"]
 
-jumlah_labeled_file = 2
+label_kevin = parent_dir + "/Labeling/kevin_"
+n_kevin = 1
+class_kevin = ["grassland", "settlement", "road_n_railway"]
 
-B1 = []
-B2 = []
-B3 = []
-B4 = []
-B5 = []
-B6 = []
-B7 = []
-B8 = []
-B11 = []
-B12 = []
+label_vico = parent_dir + "/Labeling/vico_"
+n_vico = 0
+class_vico = ["forest", "land_without_scrub", "land"]
+
+label_mark = parent_dir + "/Labeling/mark_"
+n_mark = 0
+class_mark = ["forest", "land_without_scrub", "land"]
+
+all_labels = [(label_andrea, n_andrea, class_andrea), 
+              (label_kevin, n_kevin, class_kevin), 
+              (label_vico, n_vico, class_vico), 
+              (label_mark, n_mark, class_mark)]
+
+src = bands_src[1]
+
+bands_output = [[], [], [], [], [], [], [], [], [], [], [], [], []]
 label_output = []
 
+for label in all_labels:
+    label_file = label[0]
+    label_count = label[1]
+    label_class = label[2]
+    out_of_bound_count = 0
+    for i in range(1, label_count + 1):
+        print("Processing file " + label_file + str(i))
+        multipoints_gdf = gpd.read_file(label_file + str(i) + ".geojson")
+        multipoints_gdf = multipoints_gdf.to_crs(src.crs)
+        
+        for index, kategori in multipoints_gdf.iterrows():s
+            multipoint_geometry = kategori['geometry']
+            
+            for point in multipoint_geometry.geoms:
+                
+                x, y = point.x, point.y
+                x_raster, y_raster = src.index(x, y)
+                try:
+                    for i in range(1, 13):
+                        if i != 9 and i != 10:
+                            bands_output[i].append(bands_list[i][x_raster][y_raster])
+                    label_output.append(label_class[index])
+                except:
+                    out_of_bound_count += 1
+        print("Done, out of bound coordinates:", out_of_bound_count)
 
-for i in range(1, jumlah_labeled_file+1):
-    grid_gdf = gpd.read_file(grid_dir+str(i)+".geojson") 
-    grid_gdf.crs = "EPSG:4326"  
-    
-    grid_gdf = grid_gdf.to_crs(b1_src_20.crs)
-    band_list = [B1_20, B2_20, B3_20, B4_20, B5_20, B6_20, B7_20, B8A_20, B11_20, B12_20]
-    
-    
-    label = ""
-    max_num = 9999999999
-    
-    # print(band_list[0][1])
-    
-    for index, row in grid_gdf.iterrows():
-        multipoly = row['geometry']
-        
-        if index == 0:
-            label = "bangunan"
-        elif index == 1:
-            label = "area_hijau"
-        else:
-            label = "air"
-            
-        for poly in multipoly.geoms:
-            
-            cluster_input = []
-            # print(poly)
-            coords = poly.exterior.coords
-            
-        
-            xmin, ymin = max_num, max_num
-            xmax, ymax = 0, 0
-            
-            for point in coords:
-                # print(point)
-                x_raster, y_raster = b1_src_20.index(point[0], point[1])
-                if(x_raster < xmin):
-                    xmin = x_raster
-                if(x_raster > xmax):
-                    xmax = x_raster
-                if(y_raster < ymin):
-                    ymin = y_raster
-                if(y_raster > ymax):
-                    ymax = y_raster
-    
-            selisihX = xmax-xmin
-            selisihY = ymax-ymin
-            
-            if (selisihX <= 5 and selisihX >= 3 and selisihY <= 5 and selisihY >= 3):
-                for i in range(xmin, xmax+1):
-                    for j in range(ymin, ymax+1):
-                        temp = []
-                        for k in range(0, 10):
-                            try:
-                                temp.append(band_list[k][i][j])
-                            except:
-                                print("index out of bound")
-                        
-                        cluster_input.append(temp)
-                        # print(selisihX, selisihY)
-                # print(cluster_input)
-                # print("process cluster")
-                
-                #coba clustering
-                #tentukan k dulu menggunakan silhouette score
-                silhouette_scores = []
-                max_k = 5
-                
-                for k in range(2, max_k + 1):   
-                    kmeans = KMeans(n_clusters=k, random_state=42)
-                    kmeans.fit(cluster_input)
-                    labels = kmeans.labels_
-                    score = silhouette_score(cluster_input, labels)
-                    silhouette_scores.append(score)
-                
-                optimal_k = np.argmax(silhouette_scores) + 2
-                
-                band_sum = [0,0,0,0,0,0,0,0,0,0]
-                
-                #setelah dpt k_optimal, pakai untuk clustering
-                kmeans = KMeans(n_clusters=optimal_k, random_state=42)
-                labels = kmeans.fit_predict(cluster_input)
-                # print(len(labels))
-                # print(len(cluster_input))
-                majority = statistics.mode(labels)
-                cnt = 0
-                
-                # print(len(labels))
-                
-                for i in range(0, len(labels)):
-                    if labels[i] == majority:
-                        curr_data = cluster_input[i]
-                        for j in range(0, 10):
-                            # print(curr_data)
-                            band_sum[j] += curr_data[j]
-                        cnt+=1
-                
-                B1.append(band_sum[0]/cnt)
-                B2.append(band_sum[1]/cnt)
-                B3.append(band_sum[2]/cnt)
-                B4.append(band_sum[3]/cnt)
-                B5.append(band_sum[4]/cnt)
-                B6.append(band_sum[5]/cnt)
-                B7.append(band_sum[6]/cnt)
-                B8.append(band_sum[7]/cnt)
-                B11.append(band_sum[8]/cnt)
-                B12.append(band_sum[9]/cnt)
-                label_output.append(label)
-        
-        
 #%% output ke excel
+output_filename = 'labelling_by_pixel_ProDS2'
 
-output_filename = 'dataset_presentasi_2'
 out_df = pd.DataFrame({
-    'B1': B1,
-    'B2': B2,
-    'B3': B3,
-    'B4': B4,
-    'B5': B5,
-    'B6': B6,
-    'B7': B7,
-    'B8': B8,
-    'B11': B11,
-    'B12': B12,
-    'jenis_lahan': label_output
+    'B1': bands_output[1],
+    'B2': bands_output[2],
+    'B3': bands_output[3],
+    'B4': bands_output[4],
+    'B5': bands_output[5],
+    'B6': bands_output[6],
+    'B7': bands_output[7],
+    'B8': bands_output[8],
+    'B11': bands_output[11],
+    'B12': bands_output[12],
+    'land_cover': label_output
     })
 
 out_df = out_df.drop_duplicates()
 
 print(out_df.shape)
 
-out_df.to_excel(script_directory + '/output_labelling/presentasi/' + output_filename + ".xlsx", index=False)
-        
-
+out_df.to_excel(parent_dir + '/Labeled/' + output_filename + ".xlsx", index=False)
 #%% UJI ANOVA
 
 features = out_df.iloc[:, :-1]  # semua kolom kecuali kolom target

@@ -426,4 +426,109 @@ rgb_image = np.dstack((hasil_b2, hasil_b3, hasil_b4)).astype(np.uint8)
 plt.figure(figsize=(12, 12))  # Set width to 10 inches, height to 6 inches
 plt.imshow(rgb_image)
         
+#%%
+# grid_gdf = gpd.read_file(label[0] + str(i)+".geojson") 
+# grid_gdf.crs = "EPSG:4326"  
+# grid_gdf = grid_gdf.to_crs(src.crs)
+
+# label = ""
+# max_num = 9999999999
+
+# # print(band_list[0][1])
+
+# for index, row in grid_gdf.iterrows():
+#     multipoly = row['geometry']
+    
+#     if index == 0:
+#         label = "bangunan"
+#     elif index == 1:
+#         label = "area_hijau"
+#     else:
+#         label = "air"
+        
+#     for poly in multipoly.geoms:
+        
+#         cluster_input = []
+#         # print(poly)
+#         coords = poly.exterior.coords
+        
+    
+#         xmin, ymin = max_num, max_num
+#         xmax, ymax = 0, 0
+        
+#         for point in coords:
+#             # print(point)
+#             x_raster, y_raster = b1_src_20.index(point[0], point[1])
+#             if(x_raster < xmin):
+#                 xmin = x_raster
+#             if(x_raster > xmax):
+#                 xmax = x_raster
+#             if(y_raster < ymin):
+#                 ymin = y_raster
+#             if(y_raster > ymax):
+#                 ymax = y_raster
+
+#         selisihX = xmax-xmin
+#         selisihY = ymax-ymin
+        
+#         if (selisihX <= 5 and selisihX >= 3 and selisihY <= 5 and selisihY >= 3):
+#             for i in range(xmin, xmax+1):
+#                 for j in range(ymin, ymax+1):
+#                     temp = []
+#                     for k in range(0, 10):
+#                         try:
+#                             temp.append(band_list[k][i][j])
+#                         except:
+#                             print("index out of bound")
+                    
+#                     cluster_input.append(temp)
+#                     # print(selisihX, selisihY)
+#             # print(cluster_input)
+#             # print("process cluster")
+            
+#             #coba clustering
+#             #tentukan k dulu menggunakan silhouette score
+#             silhouette_scores = []
+#             max_k = 5
+            
+#             for k in range(2, max_k + 1):   
+#                 kmeans = KMeans(n_clusters=k, random_state=42)
+#                 kmeans.fit(cluster_input)
+#                 labels = kmeans.labels_
+#                 score = silhouette_score(cluster_input, labels)
+#                 silhouette_scores.append(score)
+            
+#             optimal_k = np.argmax(silhouette_scores) + 2
+            
+#             band_sum = [0,0,0,0,0,0,0,0,0,0]
+            
+#             #setelah dpt k_optimal, pakai untuk clustering
+#             kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+#             labels = kmeans.fit_predict(cluster_input)
+#             # print(len(labels))
+#             # print(len(cluster_input))
+#             majority = statistics.mode(labels)
+#             cnt = 0
+            
+#             # print(len(labels))
+            
+#             for i in range(0, len(labels)):
+#                 if labels[i] == majority:
+#                     curr_data = cluster_input[i]
+#                     for j in range(0, 10):
+#                         # print(curr_data)
+#                         band_sum[j] += curr_data[j]
+#                     cnt+=1
+            
+#             B1.append(band_sum[0]/cnt)
+#             B2.append(band_sum[1]/cnt)
+#             B3.append(band_sum[2]/cnt)
+#             B4.append(band_sum[3]/cnt)
+#             B5.append(band_sum[4]/cnt)
+#             B6.append(band_sum[5]/cnt)
+#             B7.append(band_sum[6]/cnt)
+#             B8.append(band_sum[7]/cnt)
+#             B11.append(band_sum[8]/cnt)
+#             B12.append(band_sum[9]/cnt)
+#             label_output.append(label)
 
