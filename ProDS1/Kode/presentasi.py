@@ -430,7 +430,7 @@ print("file excel sudah dibuat")
 #%% lakukan prediksi terhadap data asli
 
 predict_data = pd.read_excel(script_directory + '/output_labelling/dataset_presentasi_real.xlsx')
-hasil = predict_real_data(predict_data['x'], predict_data['y'], "ProDS2.xlsx")
+hasil = predict_real_data(random_forest_model, predict_data[feature_terpilih], predict_data['x'], predict_data['y'])
 
 
 #%% import datasetnya

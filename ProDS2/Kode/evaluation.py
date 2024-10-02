@@ -17,7 +17,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 #%% read excel dan masukan ke variabel (CONTOH)
 
-labeled_filenames = ["ProDS2.xlsx"]
+labeled_filenames = ["iterasi2.xlsx"]
 dfs = []
 
 for file in labeled_filenames:

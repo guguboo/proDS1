@@ -21,9 +21,11 @@ parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 # Read the array from the txt file
 fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
 # print(fitur_terpilih)
-
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
-filename = "ProDS2.xlsx"
+# UBAHHH FILENAME DI SINII --------------------------------------------------------------------------------
+filename = content
 
 data = pd.read_excel(labeled+filename)
 
@@ -47,18 +49,20 @@ results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
 
 # Export the results DataFrame to an Excel file
 
-out_filename = "ProDS2.xlsx"
+# UBAHHH FILENAME DI SINII --------------------------------------------------------------------------------
+out_filename = content
 results_df.to_excel(parent_dir + "/Prediction/" + out_filename, index=False)
 
-def predict_real_data(training, predict_data):
+def predict_real_data(filename):
     fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
     rfc = RandomForestClassifier(n_estimators=100, random_state=42)
     
     labeled = parent_dir + "/Labeled/labeling_by_pixel_"
-    data = pd.read_excel(labeled+training)
-
-    x = data[fitur_terpilih] 
-    y = data['land_cover']  
+    training = pd.read_excel(labeled + filename)
+    predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + filename)
+    
+    x = training[fitur_terpilih] 
+    y = training['land_cover']  
 
     rfc.fit(x, y)
     predict_features = predict_data[fitur_terpilih]
@@ -66,8 +70,7 @@ def predict_real_data(training, predict_data):
     predict_features = predict_features.fillna(predict_features.mean())
     
     y_pred = rfc.predict(predict_features)
-    
-    nama_file = "iterasi1.xlsx"
+    nama_file = filename
     results_df = pd.DataFrame({'x': predict_data['x'], 'y': predict_data['y'], 'land_cover': y_pred})
     results_df.to_excel(parent_dir + '/Result/' + nama_file, index=False)
     

@@ -17,9 +17,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 
 #%% UJI ANOVA
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
 
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
-filename = "ProDS2.xlsx"
+filename = content
 df = pd.read_excel(labeled+filename)
 
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
@@ -79,7 +81,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
-k = 12
+k = 6
 
 selected_features_k_best = select_k_best(features, target, k)
 print(f"Selected {k} best features based on SelectKBest: {selected_features_k_best}")

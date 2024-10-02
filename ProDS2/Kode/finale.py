@@ -87,8 +87,10 @@ for i in range(1, 13):
 
 print("Done clipping bands")
 #%% output ke excel
-
-output_filename = 'prediksi1.xlsx'
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
+    
+output_filename = content
 out_df = pd.DataFrame({'B1': output_arr[1],
                        'B2': output_arr[2], 
                        'B3': output_arr[3], 
@@ -113,25 +115,23 @@ end_time = time.time()
 print(f"Time taken to export: {end_time - start_time:.2f} seconds")
 
 #%% REMAP the classification to 2D map
-normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 490
-normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 460
-normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 510
+# normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 490
+# normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 460
+# normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 510
 
 
-rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)
-rgb_raw = np.dstack((clipped_bands[2],clipped_bands[3],clipped_bands[4]))
+# rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)
+# rgb_raw = np.dstack((clipped_bands[2],clipped_bands[3],clipped_bands[4]))
 
-plt.figure(figsize=(20, 12))  
-plt.imshow(rgb_image)
+# plt.figure(figsize=(20, 12))  
+# plt.imshow(rgb_image)
 
 
 #%% predict data
-filename = "prediksi1.xlsx"
-training = "ProDS2.xlsx"
-predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + filename)
+filename = content
 
 start_time = time.time()
-hasil = train.predict_real_data(training, predict_data)
+hasil = train.predict_real_data(filename)
 end_time = time.time()
 
 print(f"Time taken to Predict: {end_time - start_time:.2f} seconds")

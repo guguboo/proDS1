@@ -50,21 +50,20 @@ for i in range(1, 13):
 
 print("Successfully Read Bands Raster")
 #%% LABELLING
-label_andrea = parent_dir + "/Labeling/andrea_"
-n_andrea = 1
 class_andrea = ["crop", "agriculture"]
-
-label_kevin = parent_dir + "/Labeling/kevin_"
-n_kevin = 1
 class_kevin = ["grassland", "settlement", "road_n_railway"]
-
-label_vico = parent_dir + "/Labeling/vico_"
-n_vico = 1
 class_vico = ["forest", "land_without_scrub"]
-
-label_mark = parent_dir + "/Labeling/mark_"
-n_mark = 1
 class_mark = ["river", "tank"]
+
+label_andrea = parent_dir + "/Labeling/andrea_"
+label_kevin = parent_dir + "/Labeling/kevin_"
+label_vico = parent_dir + "/Labeling/vico_"
+label_mark = parent_dir + "/Labeling/mark_"
+
+n_andrea = 1
+n_kevin = 1
+n_vico = 1
+n_mark = 1
 
 all_labels = [(label_andrea, n_andrea, class_andrea), 
               (label_kevin, n_kevin, class_kevin), 
@@ -103,7 +102,11 @@ for label in all_labels:
         print("Done, out of bound coordinates:", out_of_bound_count)
 
 #%% output ke excel
-output_filename = 'ProDS2'
+with open(script_dir + '/filename.txt', 'r') as file:
+    # Read the contents of the file
+    content = file.read().strip()  # Using .strip() to remove any leading/trailing whitespace or newlines
+
+output_filename = content
 
 out_df = pd.DataFrame({
     'B1': bands_output[1],
@@ -128,5 +131,5 @@ out_df = out_df.drop_duplicates()
 
 print(out_df.shape)
 
-out_df.to_excel(parent_dir + '/Labeled/labeling_by_pixel_' + output_filename + ".xlsx", index=False)
+out_df.to_excel(parent_dir + '/Labeled/labeling_by_pixel_' + output_filename, index=False)
 
