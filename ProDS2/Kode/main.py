@@ -18,11 +18,14 @@ Created on Tue May  7 14:35:35 2024
 
 import rasterio
 import os
+import sys
 import pandas as pd
 import geopandas as gpd
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+sys.path.append(script_dir)
+import addFeature as af
 #%%
 
 bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -113,8 +116,13 @@ out_df = pd.DataFrame({
     'B8': bands_output[8],
     'B11': bands_output[11],
     'B12': bands_output[12],
-    'land_cover': label_output
+    
     })
+
+
+out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
+out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
+out_df['land_cover'] = label_output
 
 out_df = out_df.drop_duplicates()
 
