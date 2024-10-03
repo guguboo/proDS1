@@ -128,6 +128,8 @@ print(f"Time taken to export: {end_time - start_time:.2f} seconds")
 
 
 #%% predict data
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
 filename = content
 
 start_time = time.time()

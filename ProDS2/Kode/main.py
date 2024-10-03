@@ -60,8 +60,8 @@ label_kevin = parent_dir + "/Labeling/kevin_"
 label_vico = parent_dir + "/Labeling/vico_"
 label_mark = parent_dir + "/Labeling/mark_"
 
-n_andrea = 1
-n_kevin = 1
+n_andrea = 2
+n_kevin = 2
 n_vico = 1
 n_mark = 1
 
