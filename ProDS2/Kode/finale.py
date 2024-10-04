@@ -15,6 +15,7 @@ import pandas as pd
 import geopandas as gpd
 from rasterio.mask import mask
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -86,52 +87,57 @@ for i in range(1, 13):
         done_xy = True
 
 print("Done clipping bands")
-#%% output ke excel
-with open(script_dir + '/filename.txt', 'r') as file:
-    content = file.read().strip()
+#%% output ke excel (JIKA SUDAH ADA TIDAK PERLU)
+filename = "dta_cisangkuy.xlsx"
+
+
+if os.path.exists(parent_dir + "/Data/(to predict)/" + filename):
+    print("File exists.")
+else:
+    output_filename = filename
+    out_df = pd.DataFrame({'B1': output_arr[1],
+                           'B2': output_arr[2], 
+                           'B3': output_arr[3], 
+                           'B4': output_arr[4], 
+                           'B5': output_arr[5], 
+                           'B6': output_arr[6], 
+                           'B7': output_arr[7], 
+                           'B8': output_arr[8], 
+                           'B11': output_arr[11],
+                           'B12': output_arr[12],
+                           'x': output_arr[13],
+                           'y': output_arr[14]})
     
-output_filename = content
-out_df = pd.DataFrame({'B1': output_arr[1],
-                       'B2': output_arr[2], 
-                       'B3': output_arr[3], 
-                       'B4': output_arr[4], 
-                       'B5': output_arr[5], 
-                       'B6': output_arr[6], 
-                       'B7': output_arr[7], 
-                       'B8': output_arr[8], 
-                       'B11': output_arr[11],
-                       'B12': output_arr[12],
-                       'x': output_arr[13],
-                       'y': output_arr[14]})
-
-out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
-out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
-
-
-start_time = time.time()
-out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
-end_time = time.time()
-
-print(f"Time taken to export: {end_time - start_time:.2f} seconds")
+    out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
+    out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
+    
+    
+    start_time = time.time()
+    out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
+    end_time = time.time()
+    
+    print(f"Time taken to export: {end_time - start_time:.2f} seconds")
 
 #%% REMAP the classification to 2D map
-# normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 490
-# normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 460
-# normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 510
+
+normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 490
+normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 460
+normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 510
 
 
-# rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)
-# rgb_raw = np.dstack((clipped_bands[2],clipped_bands[3],clipped_bands[4]))
+rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)
+rgb_raw = np.dstack((clipped_bands[2],clipped_bands[3],clipped_bands[4]))
 
-# plt.figure(figsize=(20, 12))  
-# plt.imshow(rgb_image)
+plt.figure(figsize=(20, 12))  
+plt.imshow(rgb_image)
 
 
 #%% predict data
+
 with open(script_dir + '/filename.txt', 'r') as file:
     content = file.read().strip()
-filename = content
 
+filename = content
 start_time = time.time()
 hasil = train.predict_real_data(filename)
 end_time = time.time()
@@ -153,48 +159,59 @@ for i in range(0, pixel_count):
     j = x_all[i]
     k = y_all[i]
     if lahan[i] == 'crop':
-        hasil_b2[j][k] = 150  # Warna Kuning
-        hasil_b3[j][k] = 150
+        hasil_b2[j][k] = 255  # Bright Yellow
+        hasil_b3[j][k] = 255
         hasil_b4[j][k] = 0
     elif lahan[i] == 'agriculture':
-        hasil_b2[j][k] = 180  # Warna Kuning Cerah
-        hasil_b3[j][k] = 180
+        hasil_b2[j][k] = 255  # Light Orange
+        hasil_b3[j][k] = 165
         hasil_b4[j][k] = 0
     elif lahan[i] == 'grassland':
-        hasil_b2[j][k] = 0  # Warna Hijau Muda
-        hasil_b3[j][k] = 255
-        hasil_b4[j][k] = 100
-    elif lahan[i] == 'settlement':
-        hasil_b2[j][k] = 128  # Warna Abu-abu
-        hasil_b3[j][k] = 128
-        hasil_b4[j][k] = 128
-    elif lahan[i] == 'road_n_railway':
-        hasil_b2[j][k] = 80  # Warna Coklat Gelap
-        hasil_b3[j][k] = 50
-        hasil_b4[j][k] = 30
-    elif lahan[i] == 'forest':
-        hasil_b2[j][k] = 0  # Warna Hijau Tua
-        hasil_b3[j][k] = 100
-        hasil_b4[j][k] = 0
-    elif lahan[i] == 'land_without_scrub':
-        hasil_b2[j][k] = 200  # Warna Coklat Kekuningan
-        hasil_b3[j][k] = 150
+        hasil_b2[j][k] = 50   # Light Green
+        hasil_b3[j][k] = 205
         hasil_b4[j][k] = 50
+    elif lahan[i] == 'settlement':
+        hasil_b2[j][k] = 255  # Light Gray
+        hasil_b3[j][k] = 0
+        hasil_b4[j][k] = 0
+    elif lahan[i] == 'road_n_railway':
+        hasil_b2[j][k] = 101  # Dark Brown
+        hasil_b3[j][k] = 67
+        hasil_b4[j][k] = 33
+    elif lahan[i] == 'forest':
+        hasil_b2[j][k] = 34   # Dark Green
+        hasil_b3[j][k] = 139
+        hasil_b4[j][k] = 34
+    elif lahan[i] == 'land_without_scrub':
+        hasil_b2[j][k] = 210  # Sandy Brown
+        hasil_b3[j][k] = 180
+        hasil_b4[j][k] = 140
     elif lahan[i] == 'river':
-        hasil_b2[j][k] = 0  # Warna Biru
+        hasil_b2[j][k] = 0    # Bright Blue
         hasil_b3[j][k] = 0
         hasil_b4[j][k] = 255
     elif lahan[i] == 'tank':
-        hasil_b2[j][k] = 0  # Warna Biru Gelap
-        hasil_b3[j][k] = 0
-        hasil_b4[j][k] = 200
-    else:
-        hasil_b2[j][k] = 0  # Warna Default (Ungu)
-        hasil_b3[j][k] = 0
-        hasil_b4[j][k] = 200
+        hasil_b2[j][k] = 0  # Purple
+        hasil_b3[j][k] = 100
+        hasil_b4[j][k] = 255
         
+legend_patches = [
+    mpatches.Patch(color=[255/255, 255/255, 0], label='Crop'),            # Bright Yellow
+    mpatches.Patch(color=[255/255, 165/255, 0], label='Agriculture'),      # Light Orange
+    mpatches.Patch(color=[50/255, 205/255, 50/255], label='Grassland'),    # Light Green
+    mpatches.Patch(color=[255/255, 0/255, 0/255], label='Settlement'), # Light Gray
+    mpatches.Patch(color=[101/255, 67/255, 33/255], label='Road/Railway'), # Dark Brown
+    mpatches.Patch(color=[34/255, 139/255, 34/255], label='Forest'),       # Dark Green
+    mpatches.Patch(color=[210/255, 180/255, 140/255], label='Land Without Scrub'), # Sandy Brown
+    mpatches.Patch(color=[0/255, 0/255, 255/255], label='River'),          # Bright Blue
+    mpatches.Patch(color=[128/255, 0/255, 128/255], label='Tank'),       # Purple
+]
 
 rgb_image = np.dstack((hasil_b2, hasil_b3, hasil_b4)).astype(np.uint8)
 plt.figure(figsize=(20, 12))  # Set width to 10 inches, height to 6 inches
 plt.imshow(rgb_image)
-    
+plt.legend(handles=legend_patches, loc='upper left', fontsize='medium')
+
+plt.show()
+
+# Define legend patches for each land cover type
