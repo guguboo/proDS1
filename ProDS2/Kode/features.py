@@ -12,6 +12,9 @@ from sklearn.feature_selection import SelectKBest
 from scipy import stats
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
@@ -27,6 +30,92 @@ df = pd.read_excel(labeled+filename)
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
 target = df.iloc[:, -1] 
 
+#%%normalisasi
+ndvi_evi = features[['NDVI', 'EVI']]
+
+other_features = features.drop(columns=['NDVI', 'EVI'])
+
+scaler = MinMaxScaler()
+other_features_scaled = pd.DataFrame(scaler.fit_transform(other_features), columns=other_features.columns)
+
+features_scaled = pd.concat([other_features_scaled, ndvi_evi], axis=1)
+
+
+for feature in features_scaled.columns:
+    plt.figure(figsize=(35, 20))
+    
+    sns.boxplot(x=target, y=features_scaled[feature], color='skyblue')
+    
+    if feature in ['NDVI', 'EVI']:
+        plt.ylim(-1, 1)
+    else:
+        plt.ylim(0, 1)
+    
+    plt.title(f'Box Plot {feature}', fontsize=30, weight='bold')
+    plt.xticks(fontsize=20, weight='bold')
+    plt.yticks(fontsize=20, weight='bold')
+    
+    plt.xlabel('')
+    
+    plt.show()
+
+filtered_features_scaled = features_scaled.drop(columns=['NDVI', 'EVI'])
+
+for label in target.unique():
+    plt.figure(figsize=(20, 15))
+    
+    sns.boxplot(data=filtered_features_scaled[target == label], color='skyblue')
+    
+    plt.ylim(0, 1)
+    
+    plt.title(f'Box Plot for Label: {label}', fontsize=30, weight='bold')
+    
+    plt.xticks(fontsize=30, weight='bold')
+    plt.yticks(fontsize=20, weight='bold')
+        
+    plt.show()
+
+#%% visualisasi
+
+global_min = features.min().min()
+global_max = features.max().max()
+
+for feature in features.columns:
+    plt.figure(figsize=(35, 20))
+    
+    sns.boxplot(x=target, y=df[feature], color='skyblue')
+    
+    if feature in ['NDVI', 'EVI']:
+        plt.ylim(-1, 1)
+    else:
+        plt.ylim(global_min, global_max)
+    
+    plt.title(f'Box Plot {feature}', fontsize=30, weight='bold')
+    plt.xticks(fontsize=20, weight='bold')
+    plt.yticks(fontsize=20, weight='bold')
+    
+    plt.xlabel('')
+    
+    plt.show()
+    
+    
+filtered_features = df[features.columns].drop(columns=['NDVI', 'EVI'])
+
+for label in target.unique():
+    plt.figure(figsize=(20, 15))
+    
+    sns.boxplot(data=filtered_features[target == label], color='skyblue')
+    
+    plt.ylim(global_min, global_max)
+    
+    plt.title(f'Box Plot for Label: {label}', fontsize=30, weight='bold')
+    
+    plt.xticks(fontsize=30, weight='bold')
+    plt.yticks(fontsize=20, weight='bold')
+        
+    plt.show()
+
+#%% uji
 def anova_test(features, target):
     # hitung F-value, p-value untuk setiap fitur
     f_values, p_values = f_classif(features, target)
