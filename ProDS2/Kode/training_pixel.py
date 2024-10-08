@@ -53,13 +53,13 @@ results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
 out_filename = content
 results_df.to_excel(parent_dir + "/Prediction/" + out_filename, index=False)
 
-def predict_real_data(filename):
+def predict_real_data(filename, dta):
     fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
     rfc = RandomForestClassifier(n_estimators=50, random_state=42)
     
     labeled = parent_dir + "/Labeled/labeling_by_pixel_"
     training = pd.read_excel(labeled + filename)
-    predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + filename)
+    predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + dta)
     
     x = training[fitur_terpilih] 
     y = training['land_cover']  

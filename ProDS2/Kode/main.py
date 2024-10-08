@@ -14,7 +14,7 @@ Created on Tue May  7 14:35:35 2024
 @author: MSI
 """
 
-#%% import dataset
+# import dataset
 
 import rasterio
 import os
@@ -61,7 +61,7 @@ label_vico = parent_dir + "/Labeling/vico_"
 label_mark = parent_dir + "/Labeling/mark_"
 
 n_andrea = 2
-n_kevin = 2
+n_kevin = 1
 n_vico = 1
 n_mark = 1
 
@@ -80,6 +80,7 @@ for label in all_labels:
     label_count = label[1]
     label_class = label[2]
     out_of_bound_count = 0
+    processed_count = 0
     for i in range(1, label_count + 1):
         print("Processing file " + label_file + str(i))
         multipoints_gdf = gpd.read_file(label_file + str(i) + ".geojson")
@@ -93,16 +94,18 @@ for label in all_labels:
                 x, y = point.x, point.y
                 x_raster, y_raster = src.index(x, y)
                 try:
+                    label_output.append(label_class[index])
                     for i in range(1, 13):
                         if i != 9 and i != 10:
                             bands_output[i].append(bands_list[i][x_raster][y_raster])
-                    label_output.append(label_class[index])
+                    processed_count += 1
                 except:
                     out_of_bound_count += 1
+        print("Count of label processed:")
         print("Done, out of bound coordinates:", out_of_bound_count)
 
 #%% output ke excel
-with open(script_dir + '/filename.txt', 'r') as file:
+with open(script_dir + '/filename.txt'  , 'r') as file:
     # Read the contents of the file
     content = file.read().strip()  # Using .strip() to remove any leading/trailing whitespace or newlines
 

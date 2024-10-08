@@ -138,8 +138,9 @@ with open(script_dir + '/filename.txt', 'r') as file:
     content = file.read().strip()
 
 filename = content
+dta = "dta_cisangkuy.xlsx"
 start_time = time.time()
-hasil = train.predict_real_data(filename)
+hasil = train.predict_real_data(filename, dta)
 end_time = time.time()
 
 print(f"Time taken to Predict: {end_time - start_time:.2f} seconds")
