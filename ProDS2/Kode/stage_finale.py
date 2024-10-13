@@ -67,7 +67,15 @@ for lc in land_cover:
 
 y_train_1 = grouped_land_cover
 
-rfc_1 = RandomForestClassifier(n_estimators=50, random_state=42)
+rfc_1 = RandomForestClassifier(
+    bootstrap=True,
+    max_depth=40,
+    max_features='log2',
+    min_samples_leaf=2,
+    min_samples_split=5,
+    n_estimators=300,
+    random_state=42  # To ensure reproducibility
+)
 
 rfc_1.fit(X_train[features_stage_1], grouped_land_cover)
 hasil_1 = rfc_1.predict(X_test[features_stage_1])
@@ -90,8 +98,15 @@ features_stage_2 = ['B11', 'B12']
 X = df[df['land_cover'].isin(group_1)]
 y = X['land_cover']
 
-rfc_group1_1 = RandomForestClassifier(n_estimators=50, random_state=42)
-
+rfc_group1_1 = RandomForestClassifier(
+    bootstrap=True,
+    max_depth=40,
+    max_features='log2',
+    min_samples_leaf=2,
+    min_samples_split=5,
+    n_estimators=300,
+    random_state=42  # To ensure reproducibility
+)
 rfc_group1_1.fit(X[features_stage_2], y)
 
 hasil_group1_1 = rfc_group1_1.predict(df_g1[features_stage_2])
@@ -106,7 +121,15 @@ features_stage_3 = ['B11', 'B12']
 X = df[df['land_cover'].isin(group_3)]
 y = X['land_cover']
 
-rfc_group3_1 = RandomForestClassifier(n_estimators=50, random_state=42)
+rfc_group3_1 = RandomForestClassifier(
+    bootstrap=True,
+    max_depth=40,
+    max_features='log2',
+    min_samples_leaf=2,
+    min_samples_split=5,
+    n_estimators=300,
+    random_state=42  # To ensure reproducibility
+)
 
 rfc_group3_1.fit(X[features_stage_3], y)
 
@@ -122,7 +145,15 @@ features_stage_2 = ['B11', 'B12', 'B8', 'B6']
 X = df[df['land_cover'].isin(group_2)]
 y = X['land_cover']
 
-rfc_group2_1 = RandomForestClassifier(n_estimators=50, random_state=42)
+rfc_group2_1 = RandomForestClassifier(
+    bootstrap=True,
+    max_depth=40,
+    max_features='log2',
+    min_samples_leaf=2,
+    min_samples_split=5,
+    n_estimators=300,
+    random_state=42  # To ensure reproducibility
+)
 
 rfc_group2_1.fit(X[features_stage_2], y)
 

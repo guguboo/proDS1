@@ -10,6 +10,7 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 import numpy as np
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,13 +37,45 @@ y = data['land_cover']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
  
 # Initialize the Random Forest Classifier
+'''
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
+param_grid = {
+    'n_estimators': [100, 300, 500],        # Number of trees
+    'max_depth': [20, 40, None],              # Depth of each tree
+    'min_samples_split': [2, 5, 10],                  # Minimum samples required to split a node
+    'min_samples_leaf': [1, 2, 4],                    # Minimum samples required at each leaf node
+    'max_features': ['auto', 'sqrt', 'log2'],         # Number of features to consider for the best split
+    'bootstrap': [True, False]                        # Whether bootstrap samples are used to build trees
+}
+
+grid_search = GridSearchCV(estimator=rf_classifier, param_grid=param_grid,
+                           cv=3, n_jobs=-1, verbose=2, scoring='accuracy')
+
+# Fit the model to find the best parameters
+grid_search.fit(X, y)
+
+# Print the best parameters
+print(f"Best parameters: {grid_search.best_params_}")
+'''
+
+
+rf_optimized = RandomForestClassifier(
+    bootstrap=True,
+    max_depth=40,
+    max_features='log2',
+    min_samples_leaf=2,
+    min_samples_split=5,
+    n_estimators=300,
+    random_state=42  # To ensure reproducibility
+)
+
+
 # Train the classifier on the training data
-rf_classifier.fit(X_train, y_train)
+rf_optimized.fit(X_train, y_train)
 
 # Predict land cover types for the test data
-y_pred = rf_classifier.predict(X_test)
+y_pred = rf_optimized.predict(X_test)
 
 # Create a DataFrame to store predicted and actual labels
 results_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': y_pred})
