@@ -101,7 +101,7 @@ for label in all_labels:
                     processed_count += 1
                 except:
                     out_of_bound_count += 1
-        print("Count of label processed:")
+        print("Count of label processed:", processed_count)
         print("Done, out of bound coordinates:", out_of_bound_count)
 
 #%% output ke excel
@@ -128,7 +128,13 @@ out_df = pd.DataFrame({
 
 out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
 out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
+out_df['NDWI'] = af.addNDWI(out_df['B3'], out_df['B8'])
 out_df['land_cover'] = label_output
+
+
+duplicate_values = out_df.duplicated()
+print("jumlah duplicates")
+print(out_df[duplicate_values]['land_cover'].value_counts())
 
 out_df = out_df.drop_duplicates()
 

@@ -91,32 +91,32 @@ print("Done clipping bands")
 filename = "dta_cisangkuy.xlsx"
 
 
-if os.path.exists(parent_dir + "/Data/(to predict)/" + filename):
-    print("File exists.")
-else:
-    output_filename = filename
-    out_df = pd.DataFrame({'B1': output_arr[1],
-                           'B2': output_arr[2], 
-                           'B3': output_arr[3], 
-                           'B4': output_arr[4], 
-                           'B5': output_arr[5], 
-                           'B6': output_arr[6], 
-                           'B7': output_arr[7], 
-                           'B8': output_arr[8], 
-                           'B11': output_arr[11],
-                           'B12': output_arr[12],
-                           'x': output_arr[13],
-                           'y': output_arr[14]})
-    
-    out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
-    out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
-    
-    
-    start_time = time.time()
-    out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
-    end_time = time.time()
-    
-    print(f"Time taken to export: {end_time - start_time:.2f} seconds")
+# if os.path.exists(parent_dir + "/Data/(to predict)/" + filename):
+#     print("File exists.")
+# else:
+output_filename = filename
+out_df = pd.DataFrame({'B1': output_arr[1],
+                       'B2': output_arr[2], 
+                       'B3': output_arr[3], 
+                       'B4': output_arr[4], 
+                       'B5': output_arr[5], 
+                       'B6': output_arr[6], 
+                       'B7': output_arr[7], 
+                       'B8': output_arr[8], 
+                       'B11': output_arr[11],
+                       'B12': output_arr[12],
+                       'x': output_arr[13],
+                       'y': output_arr[14]})
+
+out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
+out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
+out_df['NDWI'] = af.addNDWI(out_df['B3'], out_df['B8'])
+
+start_time = time.time()
+out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
+end_time = time.time()
+
+print(f"Time taken to export: {end_time - start_time:.2f} seconds")
 
 #%% REMAP the classification to 2D map
 
@@ -205,7 +205,7 @@ legend_patches = [
     mpatches.Patch(color=[34/255, 139/255, 34/255], label='Forest'),       # Dark Green
     mpatches.Patch(color=[210/255, 180/255, 140/255], label='Land Without Scrub'), # Sandy Brown
     mpatches.Patch(color=[0/255, 0/255, 255/255], label='River'),          # Bright Blue
-    mpatches.Patch(color=[128/255, 0/255, 128/255], label='Tank'),       # Purple
+    mpatches.Patch(color=[0/255, 100/255, 255/255], label='Tank'),       # Purple
 ]
 
 rgb_image = np.dstack((hasil_b2, hasil_b3, hasil_b4)).astype(np.uint8)

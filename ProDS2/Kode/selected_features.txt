@@ -1,8 +1,8 @@
-B1
-B4
+B5
 B6
 B7
 B8
 B11
 B12
-EVI
+NDVI
+NDWI

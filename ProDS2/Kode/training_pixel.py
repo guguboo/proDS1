@@ -34,7 +34,7 @@ y = data['land_cover']
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
+ 
 # Initialize the Random Forest Classifier
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
@@ -55,7 +55,7 @@ results_df.to_excel(parent_dir + "/Prediction/" + out_filename, index=False)
 
 def predict_real_data(filename, dta):
     fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
-    rfc = RandomForestClassifier(n_estimators=50, random_state=42)
+    rfc = RandomForestClassifier(n_estimators=200, random_state=42)
     
     labeled = parent_dir + "/Labeled/labeling_by_pixel_"
     training = pd.read_excel(labeled + filename)

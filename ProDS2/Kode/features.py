@@ -26,11 +26,14 @@ with open(script_dir + '/filename.txt', 'r') as file:
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
 filename = content
 df = pd.read_excel(labeled+filename)
+cols = ["land_without_scrub", "grassland", "river", "crop", "road_n_railway"]
 
+df = df[df['land_cover'].isin(cols)]
+print(df['land_cover'].value_counts())
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
-target = df.iloc[:, -1] 
+target = df['land_cover'] 
 
-#%%normalisasi
+ #%%normalisasi
 ndvi_evi = features[['NDVI', 'EVI']]
 
 other_features = features.drop(columns=['NDVI', 'EVI'])
@@ -40,16 +43,21 @@ other_features_scaled = pd.DataFrame(scaler.fit_transform(other_features), colum
 
 features_scaled = pd.concat([other_features_scaled, ndvi_evi], axis=1)
 
+label_order = cols
+# label_order = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river','land_without_scrub', 'grassland', 'tank', 'settlement']
 
 for feature in features_scaled.columns:
     plt.figure(figsize=(35, 20))
     
-    sns.boxplot(x=target, y=features_scaled[feature], color='skyblue')
+    sns.boxplot(x=target, y=features_scaled[feature], color='skyblue', order=label_order)
     
-    if feature in ['NDVI', 'EVI']:
-        plt.ylim(-1, 1)
+    if feature in ['NDVI', 'EVI', 'NDWI']:
+        plt.ylim(-0.3, 1)
+    elif feature in ['B6', 'B7', 'B8']:
+        plt.ylim(0, 0.6)
     else:
-        plt.ylim(0, 1)
+        plt.ylim(0, 0.6)
+        
     
     plt.title(f'Box Plot {feature}', fontsize=30, weight='bold')
     plt.xticks(fontsize=20, weight='bold')
@@ -59,21 +67,21 @@ for feature in features_scaled.columns:
     
     plt.show()
 
-filtered_features_scaled = features_scaled.drop(columns=['NDVI', 'EVI'])
+# filtered_features_scaled = features_scaled.drop(columns=['NDVI', 'EVI'])
 
-for label in target.unique():
-    plt.figure(figsize=(20, 15))
+# for label in target.unique():
+#     plt.figure(figsize=(20, 15))
     
-    sns.boxplot(data=filtered_features_scaled[target == label], color='skyblue')
+#     sns.boxplot(data=filtered_features_scaled[target == label], color='skyblue')
     
-    plt.ylim(0, 1)
+#     plt.ylim(0, 1)
     
-    plt.title(f'Box Plot for Label: {label}', fontsize=30, weight='bold')
+#     plt.title(f'Box Plot for Label: {label}', fontsize=30, weight='bold')
     
-    plt.xticks(fontsize=30, weight='bold')
-    plt.yticks(fontsize=20, weight='bold')
+#     plt.xticks(fontsize=30, weight='bold')
+#     plt.yticks(fontsize=20, weight='bold')
         
-    plt.show()
+#     plt.show()
 
 #%% visualisasi
 
