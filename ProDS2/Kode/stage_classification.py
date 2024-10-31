@@ -100,7 +100,7 @@ predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + dta)
 #%% TAHAP PERTAMA
 
 start_time = time.time()
-features_stage_1 = ["EVI", "NDVI"]
+features_stage_1 = ["NDWI", "NDVI", "B1", "B8", "B5", "B11"]
 
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
 filename = content
@@ -129,9 +129,9 @@ for lc in land_cover:
 
 rfc_1 = RandomForestClassifier(
     bootstrap=True,
-    max_depth=40,
-    max_features='log2',
-    min_samples_leaf=2,
+    max_depth=20,
+    max_features = 'sqrt',
+    min_samples_leaf=1,
     min_samples_split=5,
     n_estimators=300,
     random_state=42  # To ensure reproducibility
@@ -157,15 +157,15 @@ end_time = time.time()
 print(f"Time taken to predict: {end_time - start_time:.2f} seconds")
 #%% TAHAP 2 GROUP 1
 
-features_stage_2 = ['B11', 'B12']
+features_stage_2 = ['B3', 'B4', 'B5', 'B8', 'B11']
 X = df[df['land_cover'].isin(group_1)]
 y = X['land_cover']
 
 rfc_group1_1 = RandomForestClassifier(
     bootstrap=True,
-    max_depth=40,
-    max_features='log2',
-    min_samples_leaf=2,
+    max_depth=20,
+    max_features = 'sqrt',
+    min_samples_leaf=1,
     min_samples_split=5,
     n_estimators=300,
     random_state=42  # To ensure reproducibility
@@ -181,15 +181,15 @@ res_group_1
 
 #%% TAHAP 2 GROUP 3
 
-features_stage_3 = ['B11', 'B12']
+features_stage_3 = ['B1', 'B2', 'B4', 'B5', 'B11', 'B12']
 X = df[df['land_cover'].isin(group_3)]
 y = X['land_cover']
 
 rfc_group3_1 = RandomForestClassifier(
     bootstrap=True,
-    max_depth=40,
-    max_features='log2',
-    min_samples_leaf=2,
+    max_depth=20,
+    max_features = 'sqrt',
+    min_samples_leaf=1,
     min_samples_split=5,
     n_estimators=300,
     random_state=42  # To ensure reproducibility
@@ -205,15 +205,15 @@ res_group_3
 
 
 #%% TAHAP 2 GROUP 2
-features_stage_2 = ['B11', 'B12', 'B8', 'B6']
+features_stage_2 = ['B5', 'B7', 'B8', 'B12']
 X = df[df['land_cover'].isin(group_2)]
 y = X['land_cover']
 
 rfc_group2_1 = RandomForestClassifier(
     bootstrap=True,
-    max_depth=40,
-    max_features='log2',
-    min_samples_leaf=2,
+    max_depth=20,
+    max_features = 'sqrt',
+    min_samples_leaf=1,
     min_samples_split=5,
     n_estimators=300,
     random_state=42  # To ensure reproducibility

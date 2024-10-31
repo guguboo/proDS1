@@ -26,48 +26,73 @@ with open(script_dir + '/filename.txt', 'r') as file:
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
 filename = content
 df = pd.read_excel(labeled+filename)
-cols = ["land_without_scrub", "grassland", "river", "crop", "road_n_railway"]
 
-df = df[df['land_cover'].isin(cols)]
-print(df['land_cover'].value_counts())
+# group = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river', 'land_without_scrub', 'grassland', 'tank', 'settlement']
+group = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river', 'land_without_scrub', 'grassland', 'tank', 'settlement']
+df = df[df['land_cover'].isin(group)]
+df = df.reset_index(drop=True)
+
 features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
-target = df['land_cover'] 
+target = df.iloc[:, -1] 
 
- #%%normalisasi
-ndvi_evi = features[['NDVI', 'EVI']]
+#%% UJI ANOVA CLEANED
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
 
-other_features = features.drop(columns=['NDVI', 'EVI'])
+labeled = parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_"
+filename = content
+df = pd.read_excel(labeled+filename)
+
+group = ['river', 'road_n_railway', 'crop', 'land_without_scrub']
+df = df[df['land_cover'].isin(group)]
+df = df.reset_index(drop=True)
+
+features = df.iloc[:, :-1]  # semua kolom kecuali kolom target
+target = df.iloc[:, -1] 
+
+#%%normalisasi
+ndvi_evi = features[['NDVI', 'EVI', 'NDWI']]
+
+other_features = features.drop(columns=['NDVI', 'EVI', 'NDWI'])
 
 scaler = MinMaxScaler()
 other_features_scaled = pd.DataFrame(scaler.fit_transform(other_features), columns=other_features.columns)
 
 features_scaled = pd.concat([other_features_scaled, ndvi_evi], axis=1)
+print(features_scaled.shape)
+print(target.shape)
+label_order = group
 
-label_order = cols
-# label_order = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river','land_without_scrub', 'grassland', 'tank', 'settlement']
+print(target.value_counts())
+# print(features_scaled[target == 'road_n_railway'].head())
 
 for feature in features_scaled.columns:
     plt.figure(figsize=(35, 20))
     
     sns.boxplot(x=target, y=features_scaled[feature], color='skyblue', order=label_order)
     
-    if feature in ['NDVI', 'EVI', 'NDWI']:
-        plt.ylim(-0.3, 1)
-    elif feature in ['B6', 'B7', 'B8']:
-        plt.ylim(0, 0.6)
+    if feature in ['NDWI']:
+        plt.ylim(-0.6, 0.1)
+    elif feature in ['NDVI', 'EVI']:        
+        plt.ylim(0, 0.8)
+    elif feature in ['B1', 'B2', 'B3', 'B4', 'B5']:
+        plt.ylim(0, 0.3)
+    elif feature in ['B11','B12']:
+        plt.ylim(0, 0.3)
+    # elif feature in ['B6', 'B7', 'B8', 'B1']:        
+    #     plt.ylim(0, 0.6)
     else:
-        plt.ylim(0, 0.6)
-        
+        plt.ylim(0, 0.5)
     
-    plt.title(f'Box Plot {feature}', fontsize=30, weight='bold')
-    plt.xticks(fontsize=20, weight='bold')
-    plt.yticks(fontsize=20, weight='bold')
+    plt.title(f'Box Plot {feature}', fontsize=40, weight='bold')
+    plt.xticks(fontsize=40, weight='bold')
+    plt.yticks(fontsize=30, weight='bold')
     
     plt.xlabel('')
     
     plt.show()
 
-# filtered_features_scaled = features_scaled.drop(columns=['NDVI', 'EVI'])
+filtered_features_scaled = features_scaled.drop(columns=['NDVI', 'EVI', 'NDWI'])
 
 # for label in target.unique():
 #     plt.figure(figsize=(20, 15))
@@ -178,6 +203,7 @@ def select_k_best(features, target, k):
     return selected_features
 
 # Jumlah fitur yang ingin dipilih
+k = 12
 k = 8
 
 selected_features_k_best = select_k_best(features, target, k)

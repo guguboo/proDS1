@@ -91,38 +91,38 @@ print("Done clipping bands")
 filename = "dta_cisangkuy.xlsx"
 
 
-# if os.path.exists(parent_dir + "/Data/(to predict)/" + filename):
-#     print("File exists.")
-# else:
-output_filename = filename
-out_df = pd.DataFrame({'B1': output_arr[1],
-                       'B2': output_arr[2], 
-                       'B3': output_arr[3], 
-                       'B4': output_arr[4], 
-                       'B5': output_arr[5], 
-                       'B6': output_arr[6], 
-                       'B7': output_arr[7], 
-                       'B8': output_arr[8], 
-                       'B11': output_arr[11],
-                       'B12': output_arr[12],
-                       'x': output_arr[13],
-                       'y': output_arr[14]})
-
-out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
-out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
-out_df['NDWI'] = af.addNDWI(out_df['B3'], out_df['B8'])
-
-start_time = time.time()
-out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
-end_time = time.time()
-
-print(f"Time taken to export: {end_time - start_time:.2f} seconds")
+if os.path.exists(parent_dir + "/Data/(to predict)/" + filename):
+    print("File exists.")
+else:
+    output_filename = filename
+    out_df = pd.DataFrame({'B1': output_arr[1],
+                           'B2': output_arr[2], 
+                           'B3': output_arr[3], 
+                           'B4': output_arr[4], 
+                           'B5': output_arr[5], 
+                           'B6': output_arr[6], 
+                           'B7': output_arr[7], 
+                           'B8': output_arr[8], 
+                           'B11': output_arr[11],
+                           'B12': output_arr[12],
+                           'x': output_arr[13],
+                           'y': output_arr[14]})
+    
+    out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
+    out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
+    out_df['NDWI'] = af.addNDWI(out_df['B3'], out_df['B8'])
+    
+    start_time = time.time()
+    out_df.to_excel(parent_dir + '/Data/(to predict)/' + output_filename, index=False)
+    end_time = time.time()
+    
+    print(f"Time taken to export: {end_time - start_time:.2f} seconds")
 
 #%% REMAP the classification to 2D map
 
-normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 490
-normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 460
-normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 510
+normalized_b2 = clipped_bands[2] / clipped_bands[2].max() * 800
+normalized_b3 = clipped_bands[3] / clipped_bands[3].max() * 800
+normalized_b4 = clipped_bands[4] / clipped_bands[4].max() * 800
 
 
 rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)

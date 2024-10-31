@@ -22,10 +22,32 @@ parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 # Read the array from the txt file
 fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
 # print(fitur_terpilih)
+
 with open(script_dir + '/filename.txt', 'r') as file:
     content = file.read().strip()
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
-# UBAHHH FILENAME DI SINII --------------------------------------------------------------------------------
+# UBAHHH FILENAME DI SINII ----------------------------------------------------------------------------------
+filename = content
+
+try:
+    data = pd.read_excel(labeled+filename)
+except:
+    data = pd.read_excel(parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_" + filename)
+X = data[fitur_terpilih] 
+y = data['land_cover']        
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+ 
+
+#%% TRAINING cleaned_outliers
+
+fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
+# print(fitur_terpilih)
+with open(script_dir + '/filename.txt', 'r') as file:
+    content = file.read().strip()
+labeled = parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_"
+# UBAHHH FILENAME DI SINII ----------------------------------------------------------------------------------
 filename = content
 
 data = pd.read_excel(labeled+filename)
@@ -36,7 +58,7 @@ y = data['land_cover']
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
  
-# Initialize the Random Forest Classifier
+#%% Initialize the Random Forest Classifier
 '''
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
@@ -59,14 +81,14 @@ grid_search.fit(X, y)
 print(f"Best parameters: {grid_search.best_params_}")
 '''
 
-
+#%%
 rf_optimized = RandomForestClassifier(
     bootstrap=True,
     max_depth=40,
     max_features='log2',
-    min_samples_leaf=2,
+    min_samples_leaf=1,
     min_samples_split=5,
-    n_estimators=300,
+    n_estimators=500,
     random_state=42  # To ensure reproducibility
 )
 
@@ -88,9 +110,15 @@ results_df.to_excel(parent_dir + "/Prediction/" + out_filename, index=False)
 
 def predict_real_data(filename, dta):
     fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
-    rfc = RandomForestClassifier(n_estimators=200, random_state=42)
+    global rf_optimized
+    rfc = rf_optimized
     
-    labeled = parent_dir + "/Labeled/labeling_by_pixel_"
+
+    if int(filename.split(".")[0][-1]) > 5:    
+        labeled = parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_"
+    else:
+        labeled = parent_dir + "/Labeled/labeling_by_pixel_"
+    
     training = pd.read_excel(labeled + filename)
     predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + dta)
     

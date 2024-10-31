@@ -23,6 +23,8 @@ dfs = []
 for file in labeled_filenames:
     df = pd.read_excel(parent_dir + "/Prediction/" + file)
     dfs.append(df)
+    
+    
 #%% function buat matrix (andrea version)
 
 def evaluation_function(results, bands):
