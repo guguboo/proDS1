@@ -41,6 +41,8 @@ from scipy import stats
 script_directory = os.path.dirname(os.path.abspath(__file__))
 
 #%% import dataset
+
+bands_src = []
 b1_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B01_20m.jp2'
 b2_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B02_20m.jp2'
 b3_path_20 = script_directory + '/jp2/20m/T48MYT_20231220T030131_B03_20m.jp2'

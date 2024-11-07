@@ -11,17 +11,20 @@ import os
 import pandas as pd
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
-from itertools import combinations
 import seaborn as sns
 
-script_directory = os.path.dirname(os.path.abspath(__file__))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 #%% read excel dan masukan ke variabel (CONTOH)
 
-df1 = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/prediction_results.xlsx")
-df2 = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/prediction_presentasi.xlsx")
-df3 = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/prediksi_grid.xlsx")
-df4 = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/prediksi_presentasi.xlsx")
+labeled_filenames = ["klasifikasi_bertahap_1.xlsx"]
+dfs = []
 
+for file in labeled_filenames:
+    df = pd.read_excel(parent_dir + "/Prediction/" + file)
+    dfs.append(df)
+    
+    
 #%% function buat matrix (andrea version)
 
 def evaluation_function(results, bands):
@@ -135,79 +138,4 @@ def evaluation_function(results, bands):
         print(f"  Best F1 Score: {f1[i] * 100:.2f}% (DataFrame {best_f1[i]})\n")
 
 # run
-dfs = [df1, df2, df3, df4]
 evaluation_function(dfs, [""])
-
-   
-
-#%% reset best variables
-
-band_air = []
-band_bangunan = []
-band_area_hijau = []
-band_weighted = []
-
-f1_air_max = 0
-f1_bangunan_max = 0
-f1_area_hijau_max = 0
-best_weighted = 0
-
-#%% function buat matrix (VICO VERSION)
-
-def evaluation_function(prediction_array, truth_array, bands):
-    
-    global f1_air_max, f1_bangunan_max, f1_area_hijau_max, best_weighted
-    global band_air, band_bangunan, band_area_hijau, band_weighted
-
-    classes = set(truth_array.unique())
-    
-    f1 = f1_score(truth_array, prediction_array, average=None)
-    
-    for i, cls in enumerate(classes):
-        if(cls == "air"):
-            if(f1[i] > f1_air_max):
-                f1_air_max = f1[i]
-                band_air = bands
-        elif(cls == "bangunan"):
-            if(f1[i] > f1_bangunan_max):
-                f1_bangunan_max = f1[i]
-                band_bangunan = bands
-        else:
-            if(f1[i] > f1_area_hijau_max):
-                f1_area_hijau_max = f1[i]
-                band_area_hijau = bands
-        
-    f1_weighted = f1_score(truth_array, prediction_array, average='weighted')
-    if(f1_weighted > best_weighted):
-        best_weighted = f1_weighted
-        band_weighted = bands
-        
-#%% Check untuk setiap kombinasi
-
-X = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B11', 'B12']
-    
-for i in range (1, 11):
-    comb = combinations(X, i)
-     
-    for i in list(comb): 
-        selected = list(i)
-        nama_file = "prediction_result"
-        
-        for b in selected:
-            nama_file += "_" + b
-            
-        df = pd.read_excel(script_directory + "/prediction_result/combination(all_bands)/" + nama_file + ".xlsx")
-    
-        prediction_array = df['Predicted']
-        true_array = df['Actual']
-            
-        evaluation_function(prediction_array, true_array, selected)
-        
-    print(f"done for combination {i}")
-    
-print(f"{band_air} is the best for air, with f1 score: {f1_air_max * 100:.2f}%")
-print(f"{band_bangunan} is the best for bangunan, with f1 score: {f1_bangunan_max * 100:.2f}%")
-print(f"{band_area_hijau} is the best for area_hijau, with f1 score: {f1_area_hijau_max * 100:.2f}%")
-print(f"{band_weighted} is the best for overall, with f1 score: {best_weighted * 100:.2f}%")
-
-

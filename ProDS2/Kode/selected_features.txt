@@ -1,0 +1,8 @@
+B4
+B5
+B8
+B11
+B12
+NDVI
+EVI
+NDWI
