@@ -17,7 +17,7 @@ import seaborn as sns
 script_directory = os.path.dirname(os.path.abspath(__file__))
 #%% read excel dan masukan ke variabel (CONTOH)
 
-df = pd.read_excel(script_directory + "/prediction_results.xlsx")
+df = pd.read_excel("D:/Andrea/UNPAR/Sem 6/prods/proDS1/prediction_results.xlsx")
 
 prediction_array = df['Predicted']
 true_array = df['Actual']
