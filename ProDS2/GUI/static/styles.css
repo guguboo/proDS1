@@ -1,0 +1,182 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #1E152A;
+    color: white;
+    padding: 15px;
+    min-height: 8vh;
+    text-align: center;
+}
+
+.navbar h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Main container */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+    text-align: center;
+}
+
+.content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap; 
+}
+
+/* Map section */
+.map {
+    flex: 2;
+    background-color: #66b2b2;
+    height: 60vh; 
+    min-width: 300px;
+}
+
+/* Sidebar section */
+.sidebar {
+    flex: 1;
+    background-color: #f4f2e8;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+    min-width: 250px;
+}
+
+/* Sidebar elements */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+#dta-select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.area {
+    margin-bottom: 20px;
+}
+
+.area h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-top: 8px;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.color-box {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+/* Color classes for legend */
+.red { background-color: #f44336; }
+.yellow { background-color: #ffeb3b; }
+.green { background-color: #4caf50; }
+.blue { background-color: #2196f3; }
+.purple { background-color: #9c27b0; }
+.brown { background-color: #795548; }
+
+/* Buttons */
+.buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+#copy-button {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+#download-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar h1 {
+        font-size: 1.2rem;
+    }
+
+    .content {
+        flex-direction: column; /* Stacks elements vertically on smaller screens */
+        align-items: center;
+    }
+
+    .map, .sidebar {
+        flex: none;
+        width: 100%; /* Full width for both sections on small screens */
+        margin-bottom: 20px;
+    }
+
+    .map {
+        height: 300px; /* Reduce height on smaller screens */
+    }
+
+    .area h2 {
+        font-size: 1.2rem;
+    }
+
+    button {
+        width: 100%; /* Full width buttons on mobile */
+        padding: 10px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar h1 {
+        font-size: 1rem;
+    }
+
+    .area h2 {
+        font-size: 1rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+    }
+}

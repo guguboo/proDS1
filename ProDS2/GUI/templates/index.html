@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebaran Tutupan Lahan DAS Citarum Hulu</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+</head>
+<body>
+    <div class = "navbar">
+        
+    </div>
+    <div class="container">
+        
+        <h1>Sebaran Tutupan Lahan DAS Citarum Hulu</h1>
+        
+        <div class="content">
+            <div class="map" id="map"></div>
+            <script src = "../citarumData.js"></script>
+            <script>
+                const center = {{ center | tojson }};
+                const bounds = {{ bounds | tojson }};
+                const geojsonData = {{ geojson_data | tojson | safe }};
+
+
+                var map = L.map('map').setView(center, 10);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                console.log(geojsonData)
+                console.log(center)
+                // Add GeoJSON layer to map
+                var citarumData = L.geoJSON(citarum).addTo(map)
+                
+
+                map.fitBounds([
+                    [bounds[1], bounds[0]],
+                    [bounds[3], bounds[2]]
+                ]);
+            </script>
+            <div class="sidebar">
+                <label for="dta-select">Daerah Tangkapan Air</label>
+                <select id="dta-select">
+                    <option>Pilih DTA</option>
+                    <!-- Options for DTA selection could go here -->
+                </select>
+
+                <div class="area">
+                    <span>Luas DTA</span>
+                    <h2>123456 m²</h2>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jenis</th>
+                            <th>Luas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="color-box red"></span>Kelas</td><td>1234 m²</td></tr>
+                        <tr><td><span class="color-box yellow"></span>Kelas</td><td>1234 m²</td></tr>
+                        <tr><td><span class="color-box green"></span>Kelas</td><td>1234 m²</td></tr>
+                        <tr><td><span class="color-box blue"></span>Kelas</td><td>1234 m²</td></tr>
+                        <tr><td><span class="color-box purple"></span>Kelas</td><td>1234 m²</td></tr>
+                        <tr><td><span class="color-box brown"></span>Kelas</td><td>1234 m²</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="buttons">
+                    <button id="copy-button">Copy</button>
+                    <button id="download-button">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
