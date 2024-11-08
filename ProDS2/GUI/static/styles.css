@@ -42,7 +42,7 @@ body {
 .map {
     flex: 2;
     background-color: #66b2b2;
-    height: 60vh; 
+    height: 80vh; 
     min-width: 300px;
 }
 
@@ -54,6 +54,7 @@ body {
     border-radius: 8px;
     text-align: left;
     min-width: 250px;
+    height: 80vh;
 }
 
 /* Sidebar elements */

@@ -22,35 +22,55 @@
         
         <div class="content">
             <div class="map" id="map"></div>
-            <script src = "../citarumData.js"></script>
             <script>
                 const center = {{ center | tojson }};
                 const bounds = {{ bounds | tojson }};
                 const geojsonData = {{ geojson_data | tojson | safe }};
 
-
-                var map = L.map('map').setView(center, 10);
+                var map = L.map('map', {
+                    //center: [-6.986594, 107.676489],
+                    zoom: 10,
+                    dragging: false,
+                    doubleClickZoom: false,
+                    touchZoom: false,
+                    boxZoom: false,
+                    keyboard: false,
+                });
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                console.log(geojsonData)
                 console.log(center)
                 // Add GeoJSON layer to map
-                var citarumData = L.geoJSON(citarum).addTo(map)
-                
+                const geoJsonObject = JSON.parse(geojsonData);
+                L.geoJSON(geoJsonObject).addTo(map);
 
-                map.fitBounds([
-                    [bounds[1], bounds[0]],
-                    [bounds[3], bounds[2]]
-                ]);
+                map.setView(new L.LatLng(-6.986594, 107.676489));
+                // map.fitBounds([
+                //     [bounds[1], bounds[0]],
+                //     [bounds[3], bounds[2]]
+                // ]);
             </script>
             <div class="sidebar">
                 <label for="dta-select">Daerah Tangkapan Air</label>
                 <select id="dta-select">
                     <option>Pilih DTA</option>
                     <!-- Options for DTA selection could go here -->
+                    <script>
+                        const names = {{ dta | tojson | safe }};
+                        console.log(names)
+
+                        const dropdown = document.getElementById("dta-select");
+
+                        // Loop through the names and create options
+                        names.forEach(name => {
+                            const option = document.createElement("option");
+                            option.value = name;   // Option value (optional)
+                            option.textContent = name;  // Option display text
+                            dropdown.appendChild(option);
+                        });
+                    </script>
                 </select>
 
                 <div class="area">
