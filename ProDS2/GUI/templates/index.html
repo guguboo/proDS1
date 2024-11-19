@@ -21,63 +21,108 @@
         <h1>Sebaran Tutupan Lahan DAS Citarum Hulu</h1>
         
         <div class="content">
-            <div class="map" id="map"></div>
+            <div class="map" id="map">
+                {{map_html | safe}}
+            </div>
             <script>
-                const center = {{ center | tojson }};
-                const bounds = {{ bounds | tojson }};
-                const geojsonData = {{ geojson_data | tojson | safe }};
-
-                var map = L.map('map', {
-                    //center: [-6.986594, 107.676489],
-                    zoom: 10,
-                    dragging: false,
-                    doubleClickZoom: false,
-                    touchZoom: false,
-                    boxZoom: false,
-                    keyboard: false,
-                });
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                console.log(center)
-                // Add GeoJSON layer to map
-                const geoJsonObject = JSON.parse(geojsonData);
-                L.geoJSON(geoJsonObject).addTo(map);
-
-                map.setView(new L.LatLng(-6.986594, 107.676489));
-                // map.fitBounds([
-                //     [bounds[1], bounds[0]],
-                //     [bounds[3], bounds[2]]
-                // ]);
+                // Tunggu hingga peta siap
+                const map = L.map('map');
+                const fcLayer = L.geoJSON(); // Akan diisi dengan data GeoJSON nanti
+            
+                // Fetch GeoJSON data dari server
+                fetch('/dta_geojson') // Endpoint baru di Flask untuk GeoJSON
+                    .then(response => response.json())
+                    .then(data => {
+                        // Tambahkan data GeoJSON ke peta
+                        fcLayer.addData(data);
+            
+                        // Event hover untuk highlight dan tooltip
+                        fcLayer.eachLayer(function(layer) {
+                            const originalStyle = {
+                                weight: 1,
+                                color: 'red',
+                                fillOpacity: 0.1
+                            };
+                            const hoverStyle = {
+                                weight: 2,
+                                color: 'blue',
+                                fillOpacity: 0.5
+                            };
+            
+                            // Tampilkan tooltip saat hover
+                            layer.bindTooltip(layer.feature.properties.name, {
+                                permanent: false,
+                                direction: 'top'
+                            });
+            
+                            // Highlight area saat hover
+                            layer.on('mouseover', function() {
+                                layer.setStyle(hoverStyle);
+                            });
+            
+                            // Kembalikan ke gaya semula saat hover berakhir
+                            layer.on('mouseout', function() {
+                                layer.setStyle(originalStyle);
+                            });
+                        });
+            
+                        // Tambahkan layer ke peta
+                        fcLayer.addTo(map);
+                    })
+                    .catch(error => console.error('Error loading GeoJSON:', error));
             </script>
+            
             <div class="sidebar">
                 <label for="dta-select">Daerah Tangkapan Air</label>
                 <select id="dta-select">
                     <option>Pilih DTA</option>
-                    <!-- Options for DTA selection could go here -->
-                    <script>
-                        const names = {{ dta | tojson | safe }};
-                        console.log(names)
-
-                        const dropdown = document.getElementById("dta-select");
-
-                        // Loop through the names and create options
-                        names.forEach(name => {
-                            const option = document.createElement("option");
-                            option.value = name;   // Option value (optional)
-                            option.textContent = name;  // Option display text
-                            dropdown.appendChild(option);
-                        });
-                    </script>
+                    <!-- Dropdown options akan ditambahkan oleh JavaScript -->
                 </select>
-
+        
                 <div class="area">
                     <span>Luas DTA</span>
-                    <h2>123456 m²</h2>
+                    <h2 id="area-info"></h2>
                 </div>
 
+                <script>
+                    // Fetch data from Flask
+                    const names = {{ dta | tojson | safe }};
+                    const areaDict = {{ area | tojson | safe }};
+                    const dropdown = document.getElementById("dta-select");
+                    const areaInfo = document.getElementById("area-info");
+            
+                    // Populate dropdown options
+                    names.forEach(name => {
+                        const option = document.createElement("option");
+                        option.value = name;
+                        option.textContent = name;
+                        dropdown.appendChild(option);
+                    });
+            
+                    // Update area info on selection
+                    dropdown.addEventListener("change", () => {
+                        const selectedName = dropdown.value;
+                        
+                        // Referensi elemen-elemen yang akan di-hide atau ditampilkan
+                        const areaDiv = document.querySelector('.area');
+                        const table = document.querySelector('table');
+                        const buttons = document.querySelector('.buttons');
+
+                        // Jika "Pilih DTA" atau tidak ada pilihan, sembunyikan elemen
+                        if (selectedName === "Pilih DTA" || !selectedName) {
+                            areaDiv.style.display = "none";
+                            table.style.display = "none";
+                            buttons.style.display = "none";
+                        } else {
+                            // Tampilkan elemen jika ada pilihan valid
+                            areaDiv.style.display = "block";
+                            table.style.display = "block";
+                            buttons.style.display = "flex"; // Biasanya tombol menggunakan flexbox
+                            areaInfo.textContent = areaDict[selectedName] + " km²";
+                        }
+                    });
+                </script>
+        
                 <table>
                     <thead>
                         <tr>
@@ -94,7 +139,7 @@
                         <tr><td><span class="color-box brown"></span>Kelas</td><td>1234 m²</td></tr>
                     </tbody>
                 </table>
-
+        
                 <div class="buttons">
                     <button id="copy-button">Copy</button>
                     <button id="download-button">Download</button>

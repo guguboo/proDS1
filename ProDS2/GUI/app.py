@@ -24,7 +24,6 @@ def index():
         print(gdf.head())            # Check the first few rows of the data
         names = gdf['name'].tolist()
         print()
-        print(names)
 
         # Pass the center, bounds, and GeoJSON data to the frontend
         return render_template('index.html', center=center, bounds=[minx, miny, maxx, maxy], geojson_data=geojson_data, dta=names)
