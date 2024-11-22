@@ -60,15 +60,16 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
  
 #%% Initialize the Random Forest Classifier
 '''
+'''
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
 param_grid = {
-    'n_estimators': [100, 300, 500],        # Number of trees
-    'max_depth': [20, 40, None],              # Depth of each tree
-    'min_samples_split': [2, 5, 10],                  # Minimum samples required to split a node
+    'n_estimators': [300, 500],        # Number of trees
+    'max_depth': [20, 40],              # Depth of each tree
+    'min_samples_split': [5, 10],                  # Minimum samples required to split a node
     'min_samples_leaf': [1, 2, 4],                    # Minimum samples required at each leaf node
-    'max_features': ['auto', 'sqrt', 'log2'],         # Number of features to consider for the best split
-    'bootstrap': [True, False]                        # Whether bootstrap samples are used to build trees
+    'max_features': ['auto', 'sqrt'],         # Number of features to consider for the best split
+    'bootstrap': [True]                        # Whether bootstrap samples are used to build trees
 }
 
 grid_search = GridSearchCV(estimator=rf_classifier, param_grid=param_grid,
@@ -79,7 +80,6 @@ grid_search.fit(X, y)
 
 # Print the best parameters
 print(f"Best parameters: {grid_search.best_params_}")
-'''
 
 #%%
 rf_optimized = RandomForestClassifier(
