@@ -1,42 +1,36 @@
 import sys
 import os
 # Add the parent directory (prods2) to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from flask import Flask, render_template, request
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+kode_dir = os.path.join(parent_dir, "Kode")
+
+# Add Kode directory to sys.path
+sys.path.append(kode_dir)
+from flask import Flask, render_template, request, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
-from calculator import add, subtract, multiply, divide
+from integrated_labeling import make_labeled_file
 
 app = Flask(__name__)
 
 # Function to run periodically
 def periodic_task():
-    num1, num2 = 10, 5
-    # print("Running periodic calculation...")
-    results = {
-        "add": add(num1, num2),
-        "subtract": subtract(num1, num2),
-        "multiply": multiply(num1, num2),
-        "divide": divide(num1, num2),
-    }
-    print(f"Periodic Task Results: {results}")
+    pass
 
-scheduler = BackgroundScheduler()
-#scheduler.add_job(periodic_task, 'interval', days=5)  # Run every 5 days
-scheduler.add_job(periodic_task, 'interval', seconds=10)  # Temporary for testing
-scheduler.start()
+def scheduler_run():
+    scheduler = BackgroundScheduler()
+    #scheduler.add_job(periodic_task, 'interval', days=5)  # Run every 5 days
+    scheduler.add_job(periodic_task, 'interval', seconds=10)  # Temporary for testing
+    scheduler.start()
 
-@app.route("/test_calculator")
-def test_calculator():
-    # Use the calculator functions
-    num1, num2 = 10, 5
-    results = {
-        "add": add(num1, num2),
-        "subtract": subtract(num1, num2),
-        "multiply": multiply(num1, num2),
-        "divide": divide(num1, num2),
-    }
-    return f"Results: {results}"
+@app.route("/make_new_labelling_data", methods=["GET"])
+def label():
+    key = request.args.get('kata_kunci')
+    if key != "prodstimcitrasatelithore":
+        return jsonify({"Error": "Can't Label Data With Unauthorized"})
+    runtime = make_labeled_file()
+    return jsonify({"Success": f"Runtime: {runtime}"})
 
 @app.route("/home", methods=["GET", "POST"])
 def calculator():

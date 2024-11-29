@@ -3,6 +3,13 @@ from flask import Flask, render_template, jsonify
 import geopandas as gpd
 import geojson
 
+import os
+import sys
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+sys.path.append(script_dir)
+
 import shapely
 import rasterio as rio
 from rasterio.plot import show
@@ -30,7 +37,7 @@ print(ee.__version__)
 ee.Authenticate()
 
 # Mengaktifkan GEE pada Google Colab
-ee.Initialize(project='ee-proyekds1')
+ee.Initialize(project='vics-testing-gee')
 
 def generate_image(
     region,
@@ -82,7 +89,7 @@ def generate_image(
 def index():
     ## Map
     # Load the shapefile into a GeoDataFrame
-    citarum_gdf = gpd.read_file("D:/proDS1/ProDS2/GUI/mygeodata.zip")
+    citarum_gdf = gpd.read_file(script_dir + "/mygeodata.zip")
 
     print(citarum_gdf.columns)
     print(citarum_gdf.head())
@@ -142,7 +149,7 @@ def index():
 
 @app.route('/dta_geojson')
 def dta_geojson():
-    citarum_gdf = gpd.read_file("D:/proDS1/ProDS2/GUI/mygeodata.zip")
+    citarum_gdf = gpd.read_file(script_dir + "/mygeodata.zip")
     citarum_gdf = citarum_gdf.to_crs(epsg=4326)  # Pastikan CRS dalam WGS84 (longitude, latitude)
 
     # Tambahkan properti 'name' untuk setiap feature

@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./ProDS2/Kode"
+    ]
+}

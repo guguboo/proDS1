@@ -13,16 +13,34 @@ import os
 import sys
 import pandas as pd
 import geopandas as gpd
+import time
+
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 sys.path.append(script_dir)
 import addFeature as af
 
-def make_labeled_file(filename):
-    bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def check_file_exist(filename):
+    directory = parent_dir + '/Labeled/Integration'
+    file_path = os.path.join(directory, filename)
+
+    if os.path.exists(file_path):
+        return True
+    return False
+
+
+def make_labeled_file():
+    start_time = time.time()
+    with open(script_dir + '/last_fetched.txt', 'r') as file:
+        date_filename = file.read().strip()
+
+    if check_file_exist(date_filename + ".xlsx"):
+        return "Labeling file already exist."
     
-    band_path = parent_dir + '/Data/satelit/21082024/'
+    bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    band_path = parent_dir + f'/Data/satelit/{date_filename}/'
     
     for i in range(1, 13):
         if i != 9 and i != 10:
@@ -110,7 +128,7 @@ def make_labeled_file(filename):
             
     
     
-    output_filename = filename
+    output_filename = date_filename + ".xlsx"
     
     out_df = pd.DataFrame({
         'B1': bands_output[1],
@@ -142,6 +160,9 @@ def make_labeled_file(filename):
     print(out_df.shape)
     
     out_df.to_excel(parent_dir + '/Labeled/Integration/' + output_filename, index=False)
-    print(f"Done creating file {filename} in folder Labeled/Integration")
+    print(f"Done creating file {date_filename} in folder Labeled/Integration")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    return f"Labeling ran for {elapsed_time:.2f} seconds."
 
-make_labeled_file("testing.xlsx")
+# make_labeled_file("testing.xlsx")
