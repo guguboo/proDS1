@@ -21,6 +21,14 @@ import folium
 
 from shapely.geometry import Polygon
 
+import asyncio
+
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+
 app = Flask(__name__)
 
 print(ee.__version__)
@@ -138,6 +146,18 @@ def index():
     citarum_gdf['area'] = citarum_gdf['area'].apply(lambda x: f"{x:.2f}")
     area_dict = citarum_gdf.set_index('name')['area'].to_dict()
 
+    m = geemap.Map()
+
+    # Add GeoJSON data with styling
+    m.add_data(
+        citarum_gdf,
+        column='area',            # Column to style by (e.g., 'area')
+        cmap='Blues',             # Colormap
+        legend_title='Area',      # Legend title
+    )
+
+    map_html = m._parent.get_root().render()
+
     return render_template('index.html', map_html=map_html, dta=names, area=area_dict)
 
 @app.route('/dta_geojson')
@@ -153,4 +173,4 @@ def dta_geojson():
 
 if __name__ == '__main__':
     print("Hello")
-    app.run(debug=True)
+    app.run(debug=True, threaded = False)
