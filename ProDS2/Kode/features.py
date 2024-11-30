@@ -28,7 +28,8 @@ filename = content
 df = pd.read_excel(labeled+filename)
 
 # group = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river', 'land_without_scrub', 'grassland', 'tank', 'settlement']
-group = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river', 'land_without_scrub', 'grassland', 'tank', 'settlement']
+# group = ['agriculture', 'forest', 'crop', 'road_n_railway', 'river', 'land_without_scrub', 'grassland', 'tank', 'settlement']
+group = ['agriculture', 'forest', 'crop', 'tank_road_river', 'land_without_scrub', 'grassland', 'settlement']
 df = df[df['land_cover'].isin(group)]
 df = df.reset_index(drop=True)
 
