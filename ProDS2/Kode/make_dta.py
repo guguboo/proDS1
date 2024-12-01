@@ -12,11 +12,6 @@ import os
 import sys
 import pandas as pd
 import geopandas as gpd
-import numpy as np
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from rasterio.mask import mask
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -25,47 +20,50 @@ sys.path.append(script_dir)
 import addFeature as af
 import time
 
+def make_all_dta():
+    start_time = time.time()
+    bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    with open(script_dir + '/last_fetched.txt', 'r') as file:
+        date_filename = file.read().strip()
 
-bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    band_path = parent_dir + f'/Data/satelit/{date_filename}/'
 
-band_path = parent_dir + '/Data/satelit/21082024/'
+    for i in range(1, 13):
+        if i != 9 and i != 10:
+            curr_band = rasterio.open(band_path + "B" + str(i) + ".jp2")
+            bands_src[i] = curr_band
 
-for i in range(1, 13):
-    if i != 9 and i != 10:
-        curr_band = rasterio.open(band_path + "B" + str(i) + ".jp2")
-        bands_src[i] = curr_band
+    bands_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-bands_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for i in range(1, 13):
+        if i != 9 and i != 10:
+            bands_list[i] = bands_src[i].read(1)
 
-for i in range(1, 13):
-    if i != 9 and i != 10:
-        bands_list[i] = bands_src[i].read(1)
+    print("Successfully Read Bands Raster")
 
-print("Successfully Read Bands Raster")
-
-#%%
-# print(test_geojson[0]["coordinates"][0])
-# polygon_gdf = gpd.read_file(geojson_path + file) 
-# polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
+    #%%
+    # print(test_geojson[0]["coordinates"][0])
+    # polygon_gdf = gpd.read_file(geojson_path + file) 
+    # polygon_gdf = gpd.GeoDataFrame(geometry=[Polygon(my_geojson[0]["coordinates"])])
 
 
-DTA = gpd.read_file(script_dir + "/mygeodata.zip")
+    DTA = gpd.read_file(script_dir + "/mygeodata.zip")
 
-src = bands_src[1]
-for idx, dta in DTA.iterrows():
-    name = dta['name'] + ".xlsx"
-    name = name.replace("/", "_")
-    name = name.replace(" ", "")
-    print(f"Processing {dta['name']}")
-    file_path = os.path.join(parent_dir + '/Data/(to predict)/', name)
-    if os.path.isfile(file_path):
-        print("File Existed.")
-    else:
-          
+    src = bands_src[1]
+    for idx, dta in DTA.iterrows():
+        name = dta['name'] + ".xlsx"
+        name = name.replace("/", "_")
+        name = name.replace(" ", "")
+        print(f"Processing {dta['name']}")
+        file_path = os.path.join(parent_dir + '/Data/(to predict)/', name)
+        # if os.path.isfile(file_path):
+        #     print("File Existed.")
+        # else:
+            
         polygon_gdf = gpd.GeoDataFrame(geometry=[dta['geometry']])
         polygon_gdf.crs = "EPSG:4326"
     
-        polygon_gdf_reprojected = polygon_gdf.to_crs(bands_src[1].crs)
+        polygon_gdf_reprojected = polygon_gdf.to_crs(src.crs)
         
         clipped_bands = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         
@@ -112,17 +110,17 @@ for idx, dta in DTA.iterrows():
         print("Done clipping bands")
 
         out_df = pd.DataFrame({'B1': output_arr[1],
-                               'B2': output_arr[2], 
-                               'B3': output_arr[3], 
-                               'B4': output_arr[4], 
-                               'B5': output_arr[5], 
-                               'B6': output_arr[6], 
-                               'B7': output_arr[7], 
-                               'B8': output_arr[8], 
-                               'B11': output_arr[11],
-                               'B12': output_arr[12],
-                               'x': output_arr[13],
-                               'y': output_arr[14]})
+                            'B2': output_arr[2], 
+                            'B3': output_arr[3], 
+                            'B4': output_arr[4], 
+                            'B5': output_arr[5], 
+                            'B6': output_arr[6], 
+                            'B7': output_arr[7], 
+                            'B8': output_arr[8], 
+                            'B11': output_arr[11],
+                            'B12': output_arr[12],
+                            'x': output_arr[13],
+                            'y': output_arr[14]})
         
         out_df['NDVI'] = af.addNDVI(out_df['B4'], out_df['B8'])
         out_df['EVI'] = af.addEVI(out_df['B2'], out_df['B4'], out_df['B8'])
@@ -131,3 +129,6 @@ for idx, dta in DTA.iterrows():
         
         out_df.to_excel(parent_dir + '/Data/(to predict)/' + name, index=False)
         print(f"Successfully exported {name}")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    return f"DTA files created in {elapsed_time:.2f} seconds."

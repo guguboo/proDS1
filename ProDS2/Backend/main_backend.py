@@ -11,12 +11,16 @@ sys.path.append(kode_dir)
 from flask import Flask, render_template, request, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
 from integrated_labeling import make_labeled_file
+from make_dta import make_all_dta
 
 app = Flask(__name__)
 
 # Function to run periodically
 def periodic_task():
     pass
+
+# def make_dta():
+#     make_all_dta()
 
 def scheduler_run():
     scheduler = BackgroundScheduler()
@@ -32,29 +36,16 @@ def label():
     runtime = make_labeled_file()
     return jsonify({"Success": f"Runtime: {runtime}"})
 
-@app.route("/home", methods=["GET", "POST"])
-def calculator():
-    result = None
-    if request.method == "POST":
-        try:
-            num1 = float(request.form["num1"])
-            num2 = float(request.form["num2"])
-            operation = request.form["operation"]
+@app.route("/classify_at_location", methods=["GET"])
+def classify():
+    
+    pass
 
-            if operation == "add":
-                result = add(num1, num2)
-            elif operation == "subtract":
-                result = subtract(num1, num2)
-            elif operation == "multiply":
-                result = multiply(num1, num2)
-            elif operation == "divide":
-                result = divide(num1, num2)
-            else:
-                result = "Invalid operation"
-        except ValueError:
-            result = "Error: Please enter valid numbers"
-
-    return render_template("index.html", result=result)
+@app.route("/make_dta", methods=["GET"])
+def make_dta():
+    # result = make_all_dta()
+    # return jsonify({"Success": result})
+    pass
 
 if __name__ == "__main__":
     app.run(debug=True)

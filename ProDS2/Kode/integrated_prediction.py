@@ -36,18 +36,20 @@ import time
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 
-def prediction(train_filename, dta_filename):
-    
+def prediction(dta_filename):
+    with open(script_dir + '/last_fetched.txt', 'r') as file:
+        date_filename = file.read().strip()
+
     start_time = time.time()
     features_stage_1 = ["B1", "B5", "B11", "B12"]
 
     labeled = parent_dir + "/Labeled/Integration/"
 
     try:    
-        df = pd.read_excel(labeled+train_filename)
+        df = pd.read_excel(labeled+date_filename+".xlsx")
         print(df)
     except:
-        raise Exception(f"Data training {train_filename} tidak ada")
+        raise Exception(f"Data training {date_filename} tidak ada")
 
     X = df.copy()
     y = df['land_cover']        

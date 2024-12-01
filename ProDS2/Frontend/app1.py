@@ -43,6 +43,7 @@ print(ee.__version__)
 # Melakukan Autentikasi Pengguna. Klik link yang muncul, kemudian copykan
 # token yang diperoleh ke kolom yang tersedia
 ee.Authenticate()
+print("testing, apakah berjalan")
 
 # Mengaktifkan GEE pada Google Colab
 ee.Initialize(project='vics-testing-gee')
