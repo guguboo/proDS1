@@ -39,6 +39,8 @@ parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 def prediction(dta_filename):
     with open(script_dir + '/last_fetched.txt', 'r') as file:
         date_filename = file.read().strip()
+        
+    save_dir = os.path.join(parent_dir, 'Images')
 
     start_time = time.time()
     features_stage_1 = ["B1", "B5", "B11", "B12"]
@@ -316,6 +318,14 @@ def prediction(dta_filename):
             hasil_b3[j][k] = 180
             hasil_b4[j][k] = 140
             
+    # Menentukan path untuk menyimpan gambar
+    output_filename = f"{dta_filename.split(".")[0]}_raw.png"  
+    output_path = os.path.join(save_dir, output_filename)
+
+    # Menyimpan gambar
+    plt.savefig(output_path, format='png') 
+    print(f"Gambar berhasil disimpan di {output_path}")
+
 # MATPLOTLIB TRY EXPORT ----------------------------------------------------------------
     # export ke folder f"{parent_dir}/Images/"
     # beri nama file f"{dta_filename.split(".")[0]}_classified.(jpg/png/webp)"
@@ -334,7 +344,17 @@ def prediction(dta_filename):
     plt.figure(figsize=(20, 12))  # Set width to 10 inches, height to 6 inches
     plt.imshow(rgb_image)
     plt.legend(handles=legend_patches, loc='upper left', fontsize='medium')
-
-    plt.show()
     
+    # Menentukan path untuk menyimpan gambar
+    output_filename = f"{dta_filename.split('.')[0]}_classified.png"  
+    output_path = os.path.join(save_dir, output_filename)
+
+    # Menyimpan gambar
+    plt.savefig(output_path, format='png') 
+    plt.show()
+    plt.close()  
+
+    print(f"Gambar berhasil disimpan di {output_path}")
 # --------------------------------------------------------------------------
+
+prediction('testing.xlsx','07DTACisangkuy.xlsx')
