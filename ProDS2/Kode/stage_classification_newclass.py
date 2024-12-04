@@ -116,9 +116,8 @@ print("Done clipping bands")
 #%% import df
 with open(script_dir + '/filename.txt', 'r') as file:
     content = file.read().strip()
-
 filename = content
-dta = "dta_cisangkuy_2.xlsx"
+dta = "05DTACiranjeng_CisangkuyHulu.xlsx"
 labeled = parent_dir + "/Labeled/labeling_by_pixel_"
 training = pd.read_excel(labeled + filename)
 predict_data = pd.read_excel(parent_dir + '/Data/(to predict)/' + dta)

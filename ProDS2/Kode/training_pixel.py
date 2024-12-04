@@ -46,7 +46,7 @@ fitur_terpilih = np.loadtxt(script_dir + '/selected_features.txt', dtype=str)
 # print(fitur_terpilih)
 with open(script_dir + '/filename.txt', 'r') as file:
     content = file.read().strip()
-labeled = parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_"
+labeled = parent_dir + "/Labeled/labeling_by_pixel_"
 # UBAHHH FILENAME DI SINII ----------------------------------------------------------------------------------
 filename = content
 
@@ -59,7 +59,6 @@ y = data['land_cover']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
  
 #%% Initialize the Random Forest Classifier
-'''
 '''
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 
@@ -81,6 +80,7 @@ grid_search.fit(X, y)
 # Print the best parameters
 print(f"Best parameters: {grid_search.best_params_}")
 
+'''
 #%%
 rf_optimized = RandomForestClassifier(
     bootstrap=True,
@@ -114,7 +114,7 @@ def predict_real_data(filename, dta):
     rfc = rf_optimized
     
 
-    if int(filename.split(".")[0][-1]) > 5:    
+    if int(filename.split(".")[0][-1]) == 6:    
         labeled = parent_dir + "/Labeled/cleaned_outliers/labeling_by_pixel_"
     else:
         labeled = parent_dir + "/Labeled/labeling_by_pixel_"

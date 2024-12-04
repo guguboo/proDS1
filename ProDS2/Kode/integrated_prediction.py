@@ -24,7 +24,6 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 from sklearn.ensemble import RandomForestClassifier
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,20 +35,27 @@ import time
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 
-def prediction(dta_filename):
+def predict_all():
+    for i in range(59):
+        prediction(i)
+
+def prediction(dta_idx):
+    start_time = time.time()
     with open(script_dir + '/last_fetched.txt', 'r') as file:
         date_filename = file.read().strip()
+
+    dta_df = pd.read_csv(script_dir + "/dta_filenames.csv")
+    dta_filename = dta_df['dta_filenames'][dta_idx]
         
     save_dir = os.path.join(parent_dir, 'Images')
 
-    start_time = time.time()
     features_stage_1 = ["B1", "B5", "B11", "B12"]
 
     labeled = parent_dir + "/Labeled/Integration/"
 
     try:    
         df = pd.read_excel(labeled+date_filename+".xlsx")
-        print(df)
+        # print(df)
     except:
         raise Exception(f"Data training {date_filename} tidak ada")
 
@@ -90,9 +96,9 @@ def prediction(dta_filename):
 
     hasil_1 = rfc_1.predict(predict_data[features_stage_1])
 
-    print(len(hasil_1)) 
+    # print(len(hasil_1)) 
 
-    print(sum(hasil_1=="group1"))
+    # print(sum(hasil_1=="group1"))
     df_g1 = predict_data.iloc[hasil_1=="group1"]
     df_g2 = predict_data.iloc[hasil_1=="group2"]
     df_g3 = predict_data.iloc[hasil_1=="group3"]
@@ -112,7 +118,7 @@ def prediction(dta_filename):
     X = df[df['land_cover'].isin(group_1)]
     y = X['land_cover']
     
-    print(X.shape)
+    
     if(df_g1.shape[0] > 0):
         rfc_group1_1 = RandomForestClassifier(
             bootstrap=True,
@@ -205,7 +211,7 @@ def prediction(dta_filename):
     band_path = parent_dir + '/Data/satelit/21082024/'
 
     for i in range(1, 13):
-        if i != 9 and i != 10:
+        if i == 2 or i == 3 or i == 4:
             curr_band = rasterio.open(band_path + "B" + str(i) + ".jp2")
             bands_src[i] = curr_band
 
@@ -213,7 +219,7 @@ def prediction(dta_filename):
     
     DTA = gpd.read_file(script_dir + "/mygeodata.zip")
     
-    src = bands_src[1]
+    src = bands_src[2]
     for idx, dta in DTA.iterrows():
         name = dta['name'] + ".xlsx"
         name = name.replace("/", "_")
@@ -228,42 +234,12 @@ def prediction(dta_filename):
             clipped_bands = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             
             for i in range(1, 13):
-                if i != 9 and i != 10:
+                if i == 2 or i == 3 or i == 4:
+                    print("clipping band ke-" + str(i))
                     clipped, transformed = mask(bands_src[i], polygon_gdf_reprojected.geometry, crop=True)
                     clipped_bands[i] = clipped[0]
             
             
-            output_arr = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
-            done_xy = False
-            
-            # print(clipped_bands)
-            for i in range(1, 13):
-                if i != 9 and i != 10:
-                    print("clipping band ke-" + str(i))
-                    clip = clipped_bands[i]
-                    for row_idx in range(0,len(clip)):
-                        clip_row = clip[row_idx]
-                        for col_idx in range(0, len(clip_row)):
-                            item = clip_row[col_idx]
-                            if item != 0:
-                                pixel_area = 0
-                                cnt = 0
-                                try:
-                                    for j in range(row_idx-1, row_idx+2):
-                                        for k in range(col_idx-1, col_idx+2):
-                                            curr = item
-                                            if(curr != 0): 
-                                                pixel_area += curr 
-                                                cnt += 1
-                                except:
-                                    ""
-                                output_arr[i].append(pixel_area/cnt)
-                                if not done_xy:
-                                    output_arr[13].append(row_idx)
-                                    output_arr[14].append(col_idx)
-                                
-                                
-                    done_xy = True
         
     print("Done clipping bands")
     hasil_b2 = clipped_bands[2].copy()
@@ -280,7 +256,7 @@ def prediction(dta_filename):
     # beri nama file f"{dta_filename.split(".")[0]}_raw.(jpg/png/webp)"
     
     rgb_image = np.dstack((normalized_b4, normalized_b3, normalized_b2)).astype(np.uint8)    
-    plt.figure(figsize=(20, 12))  
+    plt.figure(figsize=(20, 12))      
     plt.imshow(rgb_image)
     
     #---------------------------------------------------
@@ -289,37 +265,39 @@ def prediction(dta_filename):
     for i in range(0, pixel_count):
         j = x_all[i]
         k = y_all[i]
-        if lahan[i] == 'crop':
-            hasil_b2[j][k] = 255  # Bright Yellow
-            hasil_b3[j][k] = 255
-            hasil_b4[j][k] = 0
-        elif lahan[i] == 'agriculture':
-            hasil_b2[j][k] = 255  # Light Orange
-            hasil_b3[j][k] = 165
-            hasil_b4[j][k] = 0
-        elif lahan[i] == 'grassland':
-            hasil_b2[j][k] = 50   # Light Green
-            hasil_b3[j][k] = 205
-            hasil_b4[j][k] = 50
-        elif lahan[i] == 'settlement':
-            hasil_b2[j][k] = 255  # Light Gray
-            hasil_b3[j][k] = 0
-            hasil_b4[j][k] = 0
-        elif lahan[i] == 'tank_road_river':
-            hasil_b2[j][k] = 101  # Dark Brown
-            hasil_b3[j][k] = 67
-            hasil_b4[j][k] = 33
-        elif lahan[i] == 'forest':
-            hasil_b2[j][k] = 34   # Dark Green
-            hasil_b3[j][k] = 139
-            hasil_b4[j][k] = 34
-        elif lahan[i] == 'land_without_scrub':
-            hasil_b2[j][k] = 210  # Sandy Brown
-            hasil_b3[j][k] = 180
-            hasil_b4[j][k] = 140
-            
+        try:
+            if lahan[i] == 'crop':
+                hasil_b2[j][k] = 255  # Bright Yellow
+                hasil_b3[j][k] = 255
+                hasil_b4[j][k] = 0
+            elif lahan[i] == 'agriculture':
+                hasil_b2[j][k] = 255  # Light Orange
+                hasil_b3[j][k] = 165
+                hasil_b4[j][k] = 0
+            elif lahan[i] == 'grassland':
+                hasil_b2[j][k] = 50   # Light Green
+                hasil_b3[j][k] = 205
+                hasil_b4[j][k] = 50
+            elif lahan[i] == 'settlement':
+                hasil_b2[j][k] = 255  # Light Gray
+                hasil_b3[j][k] = 0
+                hasil_b4[j][k] = 0
+            elif lahan[i] == 'tank_road_river':
+                hasil_b2[j][k] = 101  # Dark Brown
+                hasil_b3[j][k] = 67
+                hasil_b4[j][k] = 33
+            elif lahan[i] == 'forest':
+                hasil_b2[j][k] = 34   # Dark Green
+                hasil_b3[j][k] = 139
+                hasil_b4[j][k] = 34
+            elif lahan[i] == 'land_without_scrub':
+                hasil_b2[j][k] = 210  # Sandy Brown
+                hasil_b3[j][k] = 180
+                hasil_b4[j][k] = 140
+        except:
+            ""
     # Menentukan path untuk menyimpan gambar
-    output_filename = f"{dta_filename.split(".")[0]}_raw.png"  
+    output_filename = f"{dta_filename.split('.')[0]}_raw.png"  
     output_path = os.path.join(save_dir, output_filename)
 
     # Menyimpan gambar
@@ -350,11 +328,11 @@ def prediction(dta_filename):
     output_path = os.path.join(save_dir, output_filename)
 
     # Menyimpan gambar
-    plt.savefig(output_path, format='png') 
-    plt.show()
+    plt.savefig(output_path, format='png')
+    # plt.show()
     plt.close()  
 
     print(f"Gambar berhasil disimpan di {output_path}")
 # --------------------------------------------------------------------------
 
-prediction('testing.xlsx','07DTACisangkuy.xlsx')
+predict_all()

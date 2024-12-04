@@ -65,6 +65,9 @@ polygon_gdf = DTA_Cisangkuy
 polygon_gdf.crs = "EPSG:4326"
 polygon_gdf_reprojected = polygon_gdf.to_crs(bands_src[1].crs)
 
+print(DTA_Cisangkuy)
+
+#%%
 clipped_bands = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 for i in range(1, 13):
