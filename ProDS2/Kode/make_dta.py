@@ -97,7 +97,7 @@ def make_all_dta():
                                                 pixel_area += curr 
                                                 cnt += 1
                                         except:
-                                            ""
+                                                ""
                                     
                                 if len(output_arr[i]) < max_length:
                                     output_arr[i].append(pixel_area/cnt)
@@ -106,7 +106,7 @@ def make_all_dta():
                                         output_arr[14].append(col_idx)
                                 
                     if not done_xy:
-                        max_length = output_arr[13]
+                        max_length = len(output_arr[13])
                     done_xy = True
                     
                     
