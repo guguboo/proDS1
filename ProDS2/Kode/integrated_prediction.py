@@ -23,6 +23,7 @@ from rasterio.mask import mask
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+from collections import defaultdict
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -261,6 +262,7 @@ def prediction(dta_idx):
     
     #---------------------------------------------------
     
+    class_luas = defaultdict(int)
     pixel_count = hasil.shape[0]
     for i in range(0, pixel_count):
         j = x_all[i]
@@ -270,35 +272,50 @@ def prediction(dta_idx):
                 hasil_b2[j][k] = 255  # Bright Yellow
                 hasil_b3[j][k] = 255
                 hasil_b4[j][k] = 0
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'agriculture':
                 hasil_b2[j][k] = 255  # Light Orange
                 hasil_b3[j][k] = 165
                 hasil_b4[j][k] = 0
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'grassland':
                 hasil_b2[j][k] = 50   # Light Green
                 hasil_b3[j][k] = 205
                 hasil_b4[j][k] = 50
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'settlement':
                 hasil_b2[j][k] = 255  # Light Gray
                 hasil_b3[j][k] = 0
                 hasil_b4[j][k] = 0
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'tank_road_river':
                 hasil_b2[j][k] = 101  # Dark Brown
                 hasil_b3[j][k] = 67
                 hasil_b4[j][k] = 33
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'forest':
                 hasil_b2[j][k] = 34   # Dark Green
                 hasil_b3[j][k] = 139
                 hasil_b4[j][k] = 34
+                class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'land_without_scrub':
                 hasil_b2[j][k] = 210  # Sandy Brown
                 hasil_b3[j][k] = 180
                 hasil_b4[j][k] = 140
+                class_luas[lahan[i].title()] += 400
         except:
             ""
     # Menentukan path untuk menyimpan gambar
     output_filename = f"{dta_filename.split('.')[0]}_raw.png"  
     output_path = os.path.join(save_dir, output_filename)
+    
+    luas_filename = f"{dta_filename.split('.')[0]}_luas.csv"
+    output_luas = os.path.join(save_dir, luas_filename)
+    
+    print(class_luas)
+    result_luas = pd.DataFrame(list(class_luas.items()), columns=['kelas', 'luas'])
+
+    result_luas.to_csv(output_luas)
 
     # Menyimpan gambar
     plt.savefig(output_path, format='png') 
