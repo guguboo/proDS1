@@ -1,10 +1,12 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_file
 # Geospatial processing packages
 import geopandas as gpd
 import geojson
 
 import os
 import sys
+import urllib.parse
+from PIL import Image
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
@@ -23,12 +25,13 @@ import matplotlib.colors as cl
 import ee
 import eeconvert as eec
 import geemap
-import geemap.eefolium as emap
+# import geemap.eefolium as emap
 import folium
 
 from shapely.geometry import Polygon
 
 import asyncio
+import nest_asyncio
 
 try:
     asyncio.get_event_loop()
@@ -46,7 +49,7 @@ ee.Authenticate()
 print("testing, apakah berjalan")
 
 # Mengaktifkan GEE pada Google Colab
-ee.Initialize(project='vics-testing-gee')
+ee.Initialize(project='ee-kevinchristian')
 
 def generate_image(
     region,
@@ -105,7 +108,7 @@ def index():
 
 
     # Create a GeoDataFrame for the region
-    region_geom = citarum_gdf.unary_union  # Union all geometries into one
+    region_geom = citarum_gdf.union_all()  # Union all geometries into one
     region_geojson = mapping(region_geom)   # Convert shapely geometry to GeoJSON
     region_ee = ee.Geometry(region_geojson) # Convert GeoJSON to Earth Engine geometry
 
@@ -122,7 +125,7 @@ def index():
     region_centroid = region_geom.centroid
     region_centroid_x = region_centroid.x
     region_centroid_y = region_centroid.y
-    Map = emap.Map(center=[region_centroid_y, region_centroid_x], zoom=10)
+    Map = geemap.Map(center=[region_centroid_y, region_centroid_x], zoom=10)
 
     Map.addLayer(image, {}, 'Sentinel2')
 
@@ -142,8 +145,7 @@ def index():
     Map.addLayer(fc, {'color': 'red', 'width': 1, 'fillColor': '00000000'}, 'DTA Citarum')
 
     Map.addLayerControl()
-    map_html = Map._parent.get_root().render()
-
+    map_html = Map.to_html()
     ## Nama DTA
     names = citarum_gdf['name'].tolist()
 
@@ -164,7 +166,7 @@ def index():
         legend_title='Area',      # Legend title
     )
 
-    map_html = m._parent.get_root().render()
+    map_html = Map.to_html()
 
     return render_template('index.html', map_html=map_html, dta=names, area=area_dict)
 
@@ -179,6 +181,50 @@ def dta_geojson():
 
     return jsonify(geojson.loads(geojson_data))
 
+@app.route('/dta_image/<path:dta_name><image_type>')
+def dta_image(dta_name, image_type):
+    dta_name = urllib.parse.unquote(dta_name)
+
+    new_path = os.path.join(os.path.dirname(script_dir), 'Images/')
+    dta_name_cleaned = dta_name.replace(" ", "").replace("/", "_")
+    
+    if image_type == 'raw':
+        image_path = os.path.join(new_path, f"{dta_name_cleaned}raw.png")
+    elif image_type == 'classified':
+        image_path = os.path.join(new_path, f"{dta_name_cleaned}classified.png")
+    else:
+        return jsonify({"error": "Invalid image type"}), 400
+
+    # Cek apakah gambar ada
+    if os.path.exists(image_path):
+        # Buka gambar dan hapus background putih
+        image = Image.open(image_path)
+        image = image.convert("RGBA")
+        data = image.getdata()
+
+        new_data = []
+        for item in data:
+            # Ubah warna putih menjadi transparan
+            if item[:3] == (255, 255, 255):
+                new_data.append((255, 255, 255, 0))  # Transparan
+            else:
+                new_data.append(item)
+        image.putdata(new_data)
+
+        # Potong gambar untuk menghapus area transparan
+        bbox = image.getbbox()  # Mendapatkan bounding box non-transparan
+        if bbox:
+            image = image.crop(bbox)  # Potong gambar ke area konten
+
+        # Simpan gambar hasil edit ke disk
+        edited_image_path = os.path.join(new_path, f"{dta_name_cleaned}_{image_type}_edited.png")
+        image.save(edited_image_path, "PNG")
+    
+        return send_file(edited_image_path, mimetype='image/png')
+    else:
+        return jsonify({"error": "Image not found"}), 404
+
 if __name__ == '__main__':
     print("Hello")
+    nest_asyncio.apply()
     app.run(debug=True, threaded = False)
