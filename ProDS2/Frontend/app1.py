@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 # Geospatial processing packages
 import geopandas as gpd
 import geojson
+import json
 
 import os
 import sys
@@ -25,6 +26,7 @@ import eeconvert as eec
 import geemap
 import geemap.eefolium as emap
 import folium
+import mapclassify
 
 from shapely.geometry import Polygon
 
@@ -46,7 +48,7 @@ ee.Authenticate()
 print("testing, apakah berjalan")
 
 # Mengaktifkan GEE pada Google Colab
-ee.Initialize(project='vics-testing-gee')
+ee.Initialize(project='ee-atlk')
 
 def generate_image(
     region,
@@ -93,6 +95,9 @@ def generate_image(
     # Source: https://stackoverflow.com/a/63912278/4777141
 
     return image.clip(region)
+
+def display_map(df):
+    return ''
 
 @app.route('/')
 def index():
@@ -154,15 +159,18 @@ def index():
     citarum_gdf['area'] = citarum_gdf['area'].apply(lambda x: f"{x:.2f}")
     area_dict = citarum_gdf.set_index('name')['area'].to_dict()
 
-    m = geemap.Map()
+    m = folium.Map(location=[region_centroid_y,region_centroid_x], zoom_start = 9, scrollWheelZoom=False)
 
-    # Add GeoJSON data with styling
-    m.add_data(
-        citarum_gdf,
-        column='area',            # Column to style by (e.g., 'area')
-        cmap='Blues',             # Colormap
-        legend_title='Area',      # Legend title
-    )
+    with open('citarum_gjson.geojson', 'r') as file:
+        citarum_gjson = json.load(file)
+    column_values = [feature['properties']['name'] for feature in citarum_gjson['features']]
+    
+    choropleth = folium.Choropleth(
+        geo_data=citarum_gjson,
+        data = citarum_gdf,
+        columns=('name','area'),
+        key_on='feature.properties.name')
+    choropleth.geojson.add_to(m)
 
     map_html = m._parent.get_root().render()
 
@@ -181,4 +189,4 @@ def dta_geojson():
 
 if __name__ == '__main__':
     print("Hello")
-    app.run(debug=True, threaded = False)
+    app.run(debug=True)

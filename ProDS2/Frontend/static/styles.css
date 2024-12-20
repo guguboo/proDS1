@@ -44,6 +44,7 @@ body {
     background-color: #66b2b2;
     height: 80vh;
     min-width: 300px;
+    overflow: hidden;
 }
 
 .content #map {
@@ -52,6 +53,17 @@ body {
     bottom: 0;
     right: 2;
     left: 0;
+}
+
+svg path {
+    fill: #cccccc;
+    stroke: #000000;
+    stroke-width: 1;
+}
+
+svg path:hover {
+    fill: #ffcc00;
+    cursor: pointer;
 }
 
 /* Sidebar section */
