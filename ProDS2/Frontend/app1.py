@@ -7,6 +7,8 @@ import os
 import sys
 import urllib.parse
 from PIL import Image
+import zipfile
+from io import BytesIO
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
@@ -223,6 +225,37 @@ def dta_image(dta_name, image_type):
         return send_file(edited_image_path, mimetype='image/png')
     else:
         return jsonify({"error": "Image not found"}), 404
+
+@app.route('/download_images/<path:dta_name>')
+def download_images(dta_name):
+    dta_name = urllib.parse.unquote(dta_name)
+    new_path = os.path.join(os.path.dirname(script_dir), 'Images/')
+    dta_name_cleaned = dta_name.replace(" ", "").replace("/", "_")
+
+    # Lokasi file gambar
+    raw_image_path = os.path.join(new_path, f"{dta_name_cleaned}_raw.png")
+    classified_image_path = os.path.join(new_path, f"{dta_name_cleaned}_classified.png")
+
+    print(raw_image_path)
+    print(classified_image_path)
+    print("aj")
+    # Cek apakah file ada
+    if not os.path.exists(raw_image_path) or not os.path.exists(classified_image_path):
+        return jsonify({"error": "One or more images not found"}), 404
+
+    # Buat file ZIP dalam memori
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w') as zf:
+        zf.write(raw_image_path, os.path.basename(raw_image_path))
+        zf.write(classified_image_path, os.path.basename(classified_image_path))
+    zip_buffer.seek(0)
+
+    return send_file(
+        zip_buffer,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=f"{dta_name_cleaned}_images.zip"
+    )
 
 if __name__ == '__main__':
     print("Hello")

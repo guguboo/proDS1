@@ -137,6 +137,30 @@
                                 imageElement2.src = image2Url;
                             }
                         });
+                        document.getElementById('copy-button').addEventListener('click', function() {
+                        const areaInfo = document.getElementById('area-info').textContent;
+                        const tableRows = document.querySelectorAll('table tbody tr');
+
+                        let tableData = 'Jenis\tLuas\n';
+                        tableRows.forEach(row => {
+                            const jenis = row.children[0].textContent.trim();
+                            const luas = row.children[1].textContent.trim();
+                            tableData += `${jenis}\t${luas}\n`;
+                        });
+
+                        const fullData = `Luas DTA: ${areaInfo}\n\n${tableData}`;
+
+                        navigator.clipboard.writeText(fullData).then(() => {
+                            alert('Data berhasil disalin ke clipboard!');
+                        }).catch(err => {
+                            console.error('Gagal menyalin ke clipboard', err);
+                        });
+                    });
+
+                    document.getElementById('download-button').addEventListener('click', function() {
+                        const selectedName = dropdown.value;
+                        window.location.href = `/download_images/${selectedName}`;
+                    });
                     });
                 </script>
         
@@ -156,7 +180,6 @@
                         <tr><td><span class="color-box brown"></span>Kelas</td><td>1234 m²</td></tr>
                     </tbody>
                 </table>
-        
                 <div class="buttons">
                     <button id="copy-button">Copy</button>
                     <button id="download-button">Download</button>
