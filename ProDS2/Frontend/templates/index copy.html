@@ -298,6 +298,16 @@
                             if (highlightedRegion) {
                                 highlightedRegion.style.fill = '#cccccc';
                             }
+                            // Reset zoom ke posisi semula (viewBox default atau seluruh area)
+                            const bbox = svg.getBBox(); // Mendapatkan bounding box dari seluruh SVG
+                            const padding = 10; // Tambahkan padding jika diperlukan
+                            const viewBoxX = bbox.x - padding;
+                            const viewBoxY = bbox.y - padding;
+                            const viewBoxWidth = bbox.width + 2 * padding;
+                            const viewBoxHeight = bbox.height + 2 * padding;
+
+                            svg.setAttribute('viewBox', `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
+
                         } else {
                             // Temukan region yang sesuai dengan ID yang dipilih
                             const selectedRegion = [...regions].find(
@@ -308,15 +318,59 @@
                             areaDiv.style.display = "block";
                             table.style.display = "block";
                             buttons.style.display = "flex"; // Biasanya tombol menggunakan flexbox
+                            const selectedName = selectedRegion.getAttribute('name');
                             const selectedArea = selectedRegion.getAttribute('area');
                             areaInfo.textContent = `${selectedArea} km²`;
 
-                            // Set highlight pada dropdown change
+
                             if (highlightedRegion) {
                                 highlightedRegion.style.fill = '#cccccc';
                             }
+
+                            // Highlight region yang baru diklik
                             highlightedRegion = selectedRegion;
-                            selectedRegion.style.fill = 'yellow';
+                            selectedRegion.style.fill = 'yellow'; // Highlight warna tetap (contoh: kuning)
+
+                            // Zoom ke region yang diklik
+                            const bbox = selectedRegion.getBBox(); // Mendapatkan bounding box dari region
+                            const padding = 10; // Tambahkan padding untuk zoom
+                            const viewBoxX = bbox.x - padding;
+                            const viewBoxY = bbox.y - padding;
+                            const viewBoxWidth = bbox.width + 2 * padding;
+                            const viewBoxHeight = bbox.height + 2 * padding;
+
+                            svg.setAttribute('viewBox', `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
+
+                            // Log informasi atau lakukan sesuatu
+                            console.log(`Anda mengklik wilayah: ${selectedName}, Area: ${selectedArea}, ID: ${selectedId}`);
+                            fetch('/select', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ id: selectedId }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const tableBody = document.getElementById('data-table');
+                                tableBody.innerHTML = '';
+                                const numberFormatter = new Intl.NumberFormat('en-EN'); 
+                                data.details.forEach(row => {
+                                    // m2
+                                    const formattedLuas = numberFormatter.format(row.luas);
+                                    const tr = document.createElement('tr');
+                                    tr.innerHTML = `<td>${row.kelas}</td><td>${formattedLuas} m²</td>`;
+                                    tableBody.appendChild(tr);
+
+                                    // km2
+                                    // const luasInKm2 = row.luas / 1000000; // Mengubah m² ke km²
+                                    // formattedLuas = numberFormatter.format(luasInKm2); 
+                                    // tr = document.createElement('tr');
+                                    // tr.innerHTML = `<td>${row.kelas}</td><td>${formattedLuas} km²</td>`;
+                                    // tableBody.appendChild(tr);
+                                });
+                            })
+                            .catch(error => console.error('Error:', error));
                         }
                     });
 
