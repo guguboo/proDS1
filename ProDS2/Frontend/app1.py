@@ -1,8 +1,10 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
+import pandas as pd
 # Geospatial processing packages
 import geopandas as gpd
 import geojson
-
+import json
+import re
 import os
 import sys
 
@@ -25,6 +27,7 @@ import eeconvert as eec
 import geemap
 import geemap.eefolium as emap
 import folium
+import mapclassify
 
 from shapely.geometry import Polygon
 
@@ -46,7 +49,9 @@ ee.Authenticate()
 print("testing, apakah berjalan")
 
 # Mengaktifkan GEE pada Google Colab
-ee.Initialize(project='vics-testing-gee')
+ee.Initialize(project='ee-atlk')
+
+citarum_gdf = ""
 
 def generate_image(
     region,
@@ -94,91 +99,74 @@ def generate_image(
 
     return image.clip(region)
 
+def display_map(df):
+    return ''
+
 @app.route('/')
 def index():
     ## Map
     # Load the shapefile into a GeoDataFrame
+    global citarum_gdf
     citarum_gdf = gpd.read_file(script_dir + "/mygeodata.zip")
 
     print(citarum_gdf.columns)
     print(citarum_gdf.head())
 
+    citarum_gdf.loc[15, 'id'] = 'ID_00058'
+    citarum_gdf.loc[16, 'id'] = 'ID_00059'
+    citarum_gdf.loc[44, 'id'] = 'ID_00060'
 
-    # Create a GeoDataFrame for the region
-    region_geom = citarum_gdf.unary_union  # Union all geometries into one
-    region_geojson = mapping(region_geom)   # Convert shapely geometry to GeoJSON
-    region_ee = ee.Geometry(region_geojson) # Convert GeoJSON to Earth Engine geometry
-
-    # Generate RGB image using GEE
-    image = generate_image(
-        region_ee,
-        product='COPERNICUS/S2_SR_HARMONIZED', # Sentinel-2A
-        min_date='2023-06-01', # Get all images within
-        max_date='2024-12-31', # the year 2021
-        cloud_pct=30, # Filter out images with cloud cover >= 30.0%
-    )
-
-    # Visualize 
-    region_centroid = region_geom.centroid
-    region_centroid_x = region_centroid.x
-    region_centroid_y = region_centroid.y
-    Map = emap.Map(center=[region_centroid_y, region_centroid_x], zoom=10)
-
-    Map.addLayer(image, {}, 'Sentinel2')
-
-    # Convert the GeoDataFrame geometries to Earth Engine geometries
-    regions = []
-    features = []
-    for _, row in citarum_gdf.iterrows():
-        # Convert each geometry to Earth Engine format
-        region = ee.Geometry(mapping(row['geometry']))
-        name = row['name']
-        feature = ee.Feature(region).set('name', name)
-        regions.append(region)
-        features.append(feature)
-
-    # Merge into a feature collection and style based on 'name'
-    fc = ee.FeatureCollection(features)
-    Map.addLayer(fc, {'color': 'red', 'width': 1, 'fillColor': '00000000'}, 'DTA Citarum')
-
-    Map.addLayerControl()
-    map_html = Map._parent.get_root().render()
+    ids = citarum_gdf['id'].tolist()
 
     ## Nama DTA
-    names = citarum_gdf['name'].tolist()
-
+    names = citarum_gdf.set_index('id')['name'].to_dict()
+    
     ## Area
     citarum_gdf = citarum_gdf.to_crs(epsg=3395)
     citarum_gdf['area'] = citarum_gdf.geometry.area
     citarum_gdf['area'] = citarum_gdf['area'].astype(float)/1000000
     citarum_gdf['area'] = citarum_gdf['area'].apply(lambda x: f"{x:.2f}")
-    area_dict = citarum_gdf.set_index('name')['area'].to_dict()
+    area_dict = citarum_gdf.set_index('id')['area'].to_dict()
 
-    m = geemap.Map()
+    return render_template('index copy.html', id=ids, dta=names, area=area_dict)
 
-    # Add GeoJSON data with styling
-    m.add_data(
-        citarum_gdf,
-        column='area',            # Column to style by (e.g., 'area')
-        cmap='Blues',             # Colormap
-        legend_title='Area',      # Legend title
-    )
+@app.route('/select', methods=['POST'])
+def selected():
+    global citarum_gdf
+    data = request.get_json()  # Mendapatkan data JSON dari frontend
+    selected_id = data.get('id')  # Mengambil ID dari permintaan
+    print(f"ID yang diterima: {selected_id}")  # Logging untuk debug
+    selected_region = citarum_gdf[citarum_gdf['id'] == selected_id]
 
-    map_html = m._parent.get_root().render()
+    selected_name = selected_region['name'].iloc[0]
+    selected_name = re.sub(r"[^a-zA-Z0-9\s/]", '', selected_name)  # Tetap menghapus karakter khusus, kecuali '/'
+    selected_name = re.sub(r"/", '_', selected_name)  # Ganti '/' dengan '_'
+    selected_name = re.sub(r"\s+", '', selected_name)  # Hapus semua spasi
 
-    return render_template('index.html', map_html=map_html, dta=names, area=area_dict)
+    file_name = selected_name + '_luas.csv'
 
-@app.route('/dta_geojson')
-def dta_geojson():
-    citarum_gdf = gpd.read_file(script_dir + "/mygeodata.zip")
-    citarum_gdf = citarum_gdf.to_crs(epsg=4326)  # Pastikan CRS dalam WGS84 (longitude, latitude)
+    try:
+        # Menggabungkan path dengan os.path.join
+        file_path = os.path.join(script_dir, "../Images", file_name)
+        selected_details = pd.read_csv(file_path)
+        print(selected_details)
+        
+        # Konversi DataFrame menjadi JSON
+        selected_details_json = selected_details.to_dict(orient='records')
+        response_data = {
+            "message": f"ID {selected_id} telah diproses.",
+            "details": selected_details_json
+        }
+        return jsonify(response_data)
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
 
-    # Tambahkan properti 'name' untuk setiap feature
-    citarum_gdf['name'] = citarum_gdf['name']
-    geojson_data = citarum_gdf.to_json()
+    # Lakukan sesuatu dengan ID (misalnya, query ke database)
+    # response_message bisa diubah sesuai kebutuhan
+    response_message = f"ID {selected_id} telah diproses."
 
-    return jsonify(geojson.loads(geojson_data))
+    return jsonify({"message": response_message})
 
 if __name__ == '__main__':
     print("Hello")
-    app.run(debug=True, threaded = False)
+    app.run(debug=True)
