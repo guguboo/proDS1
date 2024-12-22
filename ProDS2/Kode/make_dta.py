@@ -137,4 +137,4 @@ def make_all_dta():
         elapsed_time = end_time - start_time
     return f"DTA files created in {elapsed_time:.2f} seconds."
 
-make_all_dta()
+# make_all_dta()

@@ -31,7 +31,7 @@ def scheduler_run():
 @app.route("/make_new_labelling_data", methods=["GET"])
 def label():
     key = request.args.get('kata_kunci')
-    if key != "prodstimcitrasatelithore":
+    if key != "prodstimcitrasatelit":
         return jsonify({"Error": "Can't Label Data With Unauthorized"})
     runtime = make_labeled_file()
     return jsonify({"Success": f"Runtime: {runtime}"})
