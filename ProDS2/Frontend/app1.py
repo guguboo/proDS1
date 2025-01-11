@@ -115,28 +115,23 @@ def dta_image(dta_name, image_type):
     else:
         return jsonify({"error": "Invalid image type"}), 400
 
-    # Cek apakah gambar ada
     if os.path.exists(image_path):
-        # Buka gambar dan hapus background putih
         image = Image.open(image_path)
         image = image.convert("RGBA")
         data = image.getdata()
 
         new_data = []
         for item in data:
-            # Ubah warna putih menjadi transparan
             if item[:3] == (255, 255, 255):
-                new_data.append((255, 255, 255, 0))  # Transparan
+                new_data.append((255, 255, 255, 0))
             else:
                 new_data.append(item)
         image.putdata(new_data)
 
-        # Potong gambar untuk menghapus area transparan
-        bbox = image.getbbox()  # Mendapatkan bounding box non-transparan
+        bbox = image.getbbox()  
         if bbox:
-            image = image.crop(bbox)  # Potong gambar ke area konten
+            image = image.crop(bbox)  
 
-        # Simpan gambar hasil edit ke disk
         edited_image_path = os.path.join(new_path, f"{dta_name_cleaned}_{image_type}_edited.png")
         image.save(edited_image_path, "PNG")
 
@@ -144,24 +139,19 @@ def dta_image(dta_name, image_type):
     else:
         return jsonify({"error": "Image not found"}), 404
 
+#Download
 @app.route('/download_images/<path:dta_name>')
 def download_images(dta_name):
     dta_name = urllib.parse.unquote(dta_name)
     new_path = os.path.join(os.path.dirname(script_dir), 'Images/')
     dta_name_cleaned = dta_name.replace(" ", "").replace("/", "_")
 
-    # Lokasi file gambar
     raw_image_path = os.path.join(new_path, f"{dta_name_cleaned}_raw.png")
     classified_image_path = os.path.join(new_path, f"{dta_name_cleaned}_classified.png")
 
-    print(raw_image_path)
-    print(classified_image_path)
-    print("aj")
-    # Cek apakah file ada
     if not os.path.exists(raw_image_path) or not os.path.exists(classified_image_path):
         return jsonify({"error": "One or more images not found"}), 404
 
-    # Buat file ZIP dalam memori
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w') as zf:
         zf.write(raw_image_path, os.path.basename(raw_image_path))
