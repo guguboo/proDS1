@@ -106,6 +106,9 @@ def dta_image(dta_name, image_type):
     new_path = os.path.join(os.path.dirname(script_dir), 'Images/')
     dta_name_cleaned = dta_name.replace(" ", "").replace("/", "_")
 
+    print(image_type)
+    print(dta_name_cleaned)
+
     if image_type == 'raw':
         image_path = os.path.join(new_path, f"{dta_name_cleaned}raw.png")
     elif image_type == 'classified':

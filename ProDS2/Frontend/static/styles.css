@@ -12,10 +12,10 @@ body {
 
 /* Navbar */
 .navbar {
-    background-color: #1E152A;
+    background-color:  #2db300;
     color: white;
-    padding: 15px;
-    min-height: 8vh;
+    padding: 5px;
+    min-height: 2vh;
     text-align: center;
 }
 
