@@ -21,11 +21,20 @@ DTA = gpd.read_file(script_dir + "/mygeodata.zip")
 real_names = []
 names = []
 for idx, dta in DTA.iterrows():
-    name = dta['name'] + ".xlsx"
-    name = name.replace("/", "_")
-    name = name.replace(" ", "")
-    real_names.append(dta['name'])
-    names.append(name)
+    dupe_idx = 2
+    if dta['name'] in real_names:    
+        real_names.append(dta['name'] + str(dupe_idx))
+        name = dta['name'] + "_" + str(dupe_idx) + ".xlsx"
+        name = name.replace("/", "_")
+        name = name.replace(" ", "")
+        names.append(name)
+        dupe_idx += 1
+    else:
+        real_names.append(dta['name'])
+        name = dta['name'] + ".xlsx"
+        name = name.replace("/", "_")
+        name = name.replace(" ", "")
+        names.append(name)
 
 out_df = pd.DataFrame({'real_names': real_names,
                        'dta_filenames': names})

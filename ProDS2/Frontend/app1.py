@@ -64,8 +64,9 @@ def selected():
     selected_id = data.get('id')  # Mengambil ID dari permintaan
     print(f"ID yang diterima: {selected_id}")  # Logging untuk debug
     selected_region = citarum_gdf[citarum_gdf['id'] == selected_id]
-
     selected_name = selected_region['name'].iloc[0]
+    if selected_id == "ID_00060" or selected_id == "ID_00054":
+        selected_name += "/2"
     selected_name = re.sub(r"[^a-zA-Z0-9\s/]", '', selected_name)  # Tetap menghapus karakter khusus, kecuali '/'
     selected_name = re.sub(r"/", '_', selected_name)  # Ganti '/' dengan '_'
     selected_name = re.sub(r"\s+", '', selected_name)  # Hapus semua spasi
