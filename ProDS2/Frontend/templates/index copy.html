@@ -13,12 +13,12 @@
     crossorigin=""></script>
 </head>
 <body>
-    <!-- <div class = "navbar">
+    <div class = "navbar">
         
-    </div> -->
+    </div>
     <div class="container">
         
-        <h1>Portal Data Tutupan Lahan DAS Citarum Hulu</h1>
+        <h1>Sebaran Tutupan Lahan DAS Citarum Hulu</h1>
         
         <div class="content">
             <div class="map" id="map">
@@ -374,97 +374,16 @@
                         }
                     });
 
-                                svg.setAttribute('viewBox', `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
-
-                                fetch('/select', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ id: selectedId }),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    const tableBody = document.getElementById('data-table');
-                                    tableBody.innerHTML = '';
-                                    const numberFormatter = new Intl.NumberFormat('en-EN'); 
-                                    data.details.forEach(row => {
-                                        // m2
-                                        const formattedLuas = numberFormatter.format(row.luas);
-                                        const tr = document.createElement('tr');
-                                        tr.innerHTML = `<td>${row.kelas}</td><td>${formattedLuas} m²</td>`;
-                                        tableBody.appendChild(tr);
-
-                                        // km2
-                                        // const luasInKm2 = row.luas / 1000000; // Mengubah m² ke km²
-                                        // formattedLuas = numberFormatter.format(luasInKm2); 
-                                        // tr = document.createElement('tr');
-                                        // tr.innerHTML = `<td>${row.kelas}</td><td>${formattedLuas} km²</td>`;
-                                        // tableBody.appendChild(tr);
-                                    });
-                                })
-                                .catch(error => console.error('Error:', error));
-
-                                // Tampilkan elemen jika ada pilihan valid
-                                areaDiv.style.display = "block";
-                                table.style.display = "block";
-                                buttons.style.display = "flex"; // Biasanya tombol menggunakan flexbox
-                                const selectedArea = selectedRegion.getAttribute('area');
-                                areaInfo.textContent = `${selectedArea} km²`;
-                                imageContainer.style.display = "flex";
-
-                                const selectedNameArea = selectedRegion.getAttribute('name')
-   
-                                const image1Url = `/dta_image/${selectedNameArea}/raw`;
-                                const image2Url = `/dta_image/${selectedNameArea}/classified`;
-                                console.log(image1Url)
-
-                                nameDta1.textContent = `${selectedNameArea} raw`
-                                nameDta2.textContent = `${selectedNameArea} classified`
-                                imageElement1.src = image1Url;
-                                imageElement2.src = image2Url;
-
-                                // Set highlight pada dropdown change
-                                if (highlightedRegion) {
-                                    highlightedRegion.style.fill = '#cccccc';
-                                }
-                                highlightedRegion = selectedRegion;
-                                selectedRegion.style.fill = 'yellow';
-                                imageContainer.style.display = "flex";
+                    // Tambahkan klik untuk elemen SVG path agar mengubah dropdown
+                    regions.forEach(region => {
+                        region.addEventListener('click', () => {
+                            const id = region.getAttribute('id');
+                            if (id) {
+                                dropdown.value = id; // Ubah dropdown sesuai dengan ID path yang diklik
+                                dropdown.dispatchEvent(new Event("change")); // Trigger event change untuk memperbarui area info
                             }
                         });
-                        
-                        document.getElementById('copy-button').addEventListener('click', function() {
-                            const areaInfo = document.getElementById('area-info').textContent;
-                            const tableRows = document.querySelectorAll('table tbody tr');
-
-                            let tableData = 'Jenis\tLuas\n';
-                            tableRows.forEach(row => {
-                                const jenis = row.children[0].textContent.trim();
-                                const luas = row.children[1].textContent.trim();
-                                tableData += `${jenis}\t${luas}\n`;
-                            });
-
-                            const fullData = `Luas DTA: ${areaInfo}\n\n${tableData}`;
-
-                            navigator.clipboard.writeText(fullData).then(() => {
-                                alert('Data berhasil disalin ke clipboard!');
-                            }).catch(err => {
-                                console.error('Gagal menyalin ke clipboard', err);
-                            });
-                        });
-                        // Tambahkan klik untuk elemen SVG path agar mengubah dropdown
-                        regions.forEach(region => {
-                            region.addEventListener('click', () => {
-                                const id = region.getAttribute('id');
-                                if (id) {
-                                    dropdown.value = id; // Ubah dropdown sesuai dengan ID path yang diklik
-                                    dropdown.dispatchEvent(new Event("change")); // Trigger event change untuk memperbarui area info
-                                }
-                            });
-                        });
                     });
-                    
                 </script>
         
                 
@@ -473,20 +392,6 @@
                     <button id="copy-button">Copy</button>
                     <button id="download-button">Download</button>
                 </div>
-            </div>
-        </div>
-        
-    </div>
-    <div class="cont">
-        
-        <div id="image-container" style="display:none;">
-            <div class="image">
-                <h3 id="dt-name-a"></h3>
-                <img id="dta-image1" alt="DTA Image 1">
-            </div class="image">
-            <div class="image">
-                <h3 id="dt-name-b"></h3>
-                <img id="dta-image2" alt="DTA Image 2">
             </div>
         </div>
     </div>
