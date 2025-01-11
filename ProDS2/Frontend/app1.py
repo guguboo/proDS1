@@ -74,6 +74,7 @@ def selected():
         # Menggabungkan path dengan os.path.join
         file_path = os.path.join(script_dir, "../Images", file_name)
         selected_details = pd.read_csv(file_path)
+        selected_details = selected_details.sort_values(by='kelas')
         print(selected_details)
         
         # Konversi DataFrame menjadi JSON
