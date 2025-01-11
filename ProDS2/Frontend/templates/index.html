@@ -83,43 +83,84 @@
                     <span>Luas DTA</span>
                     <h2 id="area-info"></h2>
                 </div>
-
                 <script>
                     // Fetch data from Flask
-                    const names = {{ dta | tojson | safe }};
-                    const areaDict = {{ area | tojson | safe }};
-                    const dropdown = document.getElementById("dta-select");
-                    const areaInfo = document.getElementById("area-info");
-            
-                    // Populate dropdown options
-                    names.forEach(name => {
-                        const option = document.createElement("option");
-                        option.value = name;
-                        option.textContent = name;
-                        dropdown.appendChild(option);
-                    });
-            
-                    // Update area info on selection
-                    dropdown.addEventListener("change", () => {
-                        const selectedName = dropdown.value;
-                        
-                        // Referensi elemen-elemen yang akan di-hide atau ditampilkan
-                        const areaDiv = document.querySelector('.area');
-                        const table = document.querySelector('table');
-                        const buttons = document.querySelector('.buttons');
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const names = {{ dta | tojson | safe }};
+                        const areaDict = {{ area | tojson | safe }};
+                        const dropdown = document.getElementById("dta-select");
+                        const areaInfo = document.getElementById("area-info");
+                        const imageContainer = document.getElementById("image-container");
+                        const imageElement1 = document.getElementById("dta-image1");
+                        const imageElement2 = document.getElementById("dta-image2");
+                        const nameDta1 = document.getElementById("dt-name-a");
+                        const nameDta2 = document.getElementById("dt-name-b");
 
-                        // Jika "Pilih DTA" atau tidak ada pilihan, sembunyikan elemen
-                        if (selectedName === "Pilih DTA" || !selectedName) {
-                            areaDiv.style.display = "none";
-                            table.style.display = "none";
-                            buttons.style.display = "none";
-                        } else {
-                            // Tampilkan elemen jika ada pilihan valid
-                            areaDiv.style.display = "block";
-                            table.style.display = "block";
-                            buttons.style.display = "flex"; // Biasanya tombol menggunakan flexbox
-                            areaInfo.textContent = areaDict[selectedName] + " km²";
-                        }
+                        // Populate dropdown options
+                        names.forEach(name => {
+                            const option = document.createElement("option");
+                            option.value = name;
+                            option.textContent = name;
+                            dropdown.appendChild(option);
+                        });
+
+                        // Update area info on selection
+                        dropdown.addEventListener("change", () => {
+                            const selectedName = dropdown.value;
+
+                            // Referensi elemen-elemen yang akan di-hide atau ditampilkan
+                            const areaDiv = document.querySelector('.area');
+                            const table = document.querySelector('table');
+                            const buttons = document.querySelector('.buttons');
+
+                            // Jika "Pilih DTA" atau tidak ada pilihan, sembunyikan elemen
+                            if (selectedName === "Pilih DTA" || !selectedName) {
+                                areaDiv.style.display = "none";
+                                table.style.display = "none";
+                                buttons.style.display = "none";
+                                imageContainer.style.display = "none";  // Hide image when no selection
+                            } else {
+                                // Tampilkan elemen jika ada pilihan valid
+                                areaDiv.style.display = "block";
+                                table.style.display = "block";
+                                buttons.style.display = "flex"; // Biasanya tombol menggunakan flexbox
+                                areaInfo.textContent = areaDict[selectedName] + " km²";
+                                imageContainer.style.display = "flex";
+                                
+                                // Fetch both images (raw and classified)
+                                const image1Url = `/dta_image/${selectedName}/raw`;
+                                const image2Url = `/dta_image/${selectedName}/classified`;
+
+                                nameDta1.textContent = `${selectedName} raw`
+                                nameDta2.textContent = `${selectedName} classified`
+                                imageElement1.src = image1Url;
+                                imageElement2.src = image2Url;
+                            }
+                        });
+                        document.getElementById('copy-button').addEventListener('click', function() {
+                        const areaInfo = document.getElementById('area-info').textContent;
+                        const tableRows = document.querySelectorAll('table tbody tr');
+
+                        let tableData = 'Jenis\tLuas\n';
+                        tableRows.forEach(row => {
+                            const jenis = row.children[0].textContent.trim();
+                            const luas = row.children[1].textContent.trim();
+                            tableData += `${jenis}\t${luas}\n`;
+                        });
+
+                        const fullData = `Luas DTA: ${areaInfo}\n\n${tableData}`;
+
+                        navigator.clipboard.writeText(fullData).then(() => {
+                            alert('Data berhasil disalin ke clipboard!');
+                        }).catch(err => {
+                            console.error('Gagal menyalin ke clipboard', err);
+                        });
+                    });
+
+                    document.getElementById('download-button').addEventListener('click', function() {
+                        const selectedName = dropdown.value;
+                        window.location.href = `/download_images/${selectedName}`;
+                    });
                     });
                 </script>
         
@@ -139,11 +180,25 @@
                         <tr><td><span class="color-box brown"></span>Kelas</td><td>1234 m²</td></tr>
                     </tbody>
                 </table>
-        
                 <div class="buttons">
                     <button id="copy-button">Copy</button>
                     <button id="download-button">Download</button>
                 </div>
+            </div>
+        </div>
+        <h1 class="title">Hasil Klasifikasi Tutupan Lahan</h1>
+    </div>
+    
+    <div class="cont">
+        
+        <div id="image-container" style="display:none;">
+            <div class="image">
+                <h3 id="dt-name-a"></h3>
+                <img id="dta-image1" alt="DTA Image 1">
+            </div class="image">
+            <div class="image">
+                <h3 id="dt-name-b"></h3>
+                <img id="dta-image2" alt="DTA Image 2">
             </div>
         </div>
     </div>
