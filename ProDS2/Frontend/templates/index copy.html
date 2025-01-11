@@ -118,7 +118,7 @@
                     const svg = document.querySelector('svg');
                     let isPanning = false;
                     let startPoint = { x: 0, y: 0 };
-                    let viewBox = { x: 0, y: 0, width: 800, height: 600 };
+                    let viewBox = { x: 0, y: 0, width: 400, height: 300 };
                     let hasMoved = false; // Flag untuk mendeteksi apakah panning terjadi
                 
                     // Event untuk drag (panning)
@@ -218,10 +218,11 @@
                         });
                 
                         region.addEventListener('mouseleave', () => {
-                            region.style.fill = '#cccccc';
+                            region.style.fill = '#ffffff';
                             if (highlightedRegion) {
                                 highlightedRegion.style.fill = 'yellow';
                             }
+                            
                             const tooltip = document.getElementById('tooltip');
                             tooltip.style.display = 'none';
                         });
@@ -230,7 +231,7 @@
                             if (!hasMoved) { // Hanya tampilkan jika panning tidak terjadi
                                 // Hapus highlight dari region sebelumnya
                                 if (highlightedRegion) {
-                                    highlightedRegion.style.fill = '#cccccc';
+                                    highlightedRegion.style.fill = '#ffffff';
                                 }
                 
                                 // Highlight region yang baru diklik
@@ -304,7 +305,8 @@
                                 buttons.style.display = "none";
                                 imageContainer.style.display = "none";
                                 if (highlightedRegion) {
-                                    highlightedRegion.style.fill = '#cccccc';
+                                    highlightedRegion.style.fill = '#ffffff';
+                                    highlightedRegion = null;
                                 }
                                 // Reset zoom ke posisi semula (viewBox default atau seluruh area)
                                 const bbox = svg.getBBox(); // Mendapatkan bounding box dari seluruh SVG
@@ -332,7 +334,7 @@
                 
                 
                                 if (highlightedRegion) {
-                                    highlightedRegion.style.fill = '#cccccc';
+                                    highlightedRegion.style.fill = '#ffffff';
                                 }
                 
                                 // Highlight region yang baru diklik
@@ -398,7 +400,7 @@
                                 imageElement2.src = image2Url;
                                 // Set highlight pada dropdown change
                                 if (highlightedRegion) {
-                                    highlightedRegion.style.fill = '#cccccc';
+                                    highlightedRegion.style.fill = '#ffffff';
                                 }
                                 highlightedRegion = selectedRegion;
                                 selectedRegion.style.fill = 'yellow';

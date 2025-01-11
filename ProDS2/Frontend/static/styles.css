@@ -42,10 +42,14 @@ body {
 /* Map section */
 .map {
     flex: 2;
-    background-color: #66b2b2;
+    background-color: #fffadf;
     height: 85vh;
     min-width: 300px;
     overflow: hidden;
+    border: #2db300;
+    border-width: 2px;
+    border-style: solid;
+    box-shadow: 1px 1px 10px gray;
 }
 
 .content #map {
@@ -58,7 +62,7 @@ body {
 }
 
 svg path {
-    fill: #cccccc;
+    fill: #ffffff;
     stroke: #000000;
     stroke-width: 1;
 }
@@ -71,12 +75,13 @@ svg path:hover {
 /* Sidebar section */
 .sidebar {
     flex: 1;
-    background-color: #f4f2e8;
+    background-color: white;
     padding: 20px;
     border-radius: 8px;
     text-align: left;
     min-width: 250px;
-    height: 85vh;
+    height: 80vh;
+    box-shadow: 1px 1px 10px gray;
 }
 
 /* Sidebar elements */

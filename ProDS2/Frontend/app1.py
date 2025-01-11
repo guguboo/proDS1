@@ -18,8 +18,6 @@ sys.path.append(script_dir)
 import asyncio
 import nest_asyncio
 
-
-
 try:
     asyncio.get_event_loop()
 except RuntimeError:
