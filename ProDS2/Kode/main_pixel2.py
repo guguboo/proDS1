@@ -62,6 +62,8 @@ class_kevin = ["grassland", "settlement", "road_n_railway"]
 class_vico = ["forest", "land_without_scrub"]
 class_mark = ["river", "tank"]
 
+merged_1 = ["river", "tank", "road_n_railway"]
+
 label_andrea = parent_dir + "/Labeling/andrea_"
 label_kevin = parent_dir + "/Labeling/kevin_"
 label_vico = parent_dir + "/Labeling/vico_"
@@ -101,25 +103,19 @@ for label in all_labels:
                 x, y = point.x, point.y
                 x_raster, y_raster = src.index(x, y)
                 try:
-                    label_output.append(label_class[index])
+                    if label_class[index] not in merged_1:
+                        label_output.append(label_class[index])
+                    else:
+                        label_output.append("tank_road_river")
                     for i in range(1, 13):
                         if i != 9 and i != 10:
-                            pixel_area = 0
-                            cnt = 0
-                            try:
-                                for j in range(x_raster-1, x_raster+2):
-                                    for k in range(y_raster-1, y_raster+2):
-                                        pixel_area += bands_list[i][j][k]
-                                        cnt += 1
-                            except:
-                                ""
-                            bands_output[i].append(pixel_area/cnt)
+                
+                            bands_output[i].append(bands_list[i][x_raster][y_raster])
                     processed_count += 1
                 except:
                     out_of_bound_count += 1
         print("Count of label processed:", processed_count)
         print("Done, out of bound coordinates:", out_of_bound_count)
-
 #%% output ke excel
 with open(script_dir + '/filename.txt'  , 'r') as file:
     # Read the contents of the file

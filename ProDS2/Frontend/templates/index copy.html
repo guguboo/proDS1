@@ -18,7 +18,7 @@
     </div>
     <div class="container">
         
-        <h1>Sebaran Tutupan Lahan DAS Citarum Hulu</h1>
+        <h2>Portal Data Tutupan Lahan DAS Citarum Hulu</h2>
         
         <div class="content">
             <div class="map" id="map">
@@ -293,6 +293,7 @@
                             const table = document.querySelector('table');
                             const buttons = document.querySelector('.buttons');
                             const imageContainer = document.getElementById("image-container");
+                            const judulImage = document.getElementById("judul-image-container");
                             const imageElement1 = document.getElementById("dta-image1");
                             const imageElement2 = document.getElementById("dta-image2");
                             const nameDta1 = document.getElementById("dt-name-a");
@@ -304,6 +305,7 @@
                                 table.style.display = "none";
                                 buttons.style.display = "none";
                                 imageContainer.style.display = "none";
+                                judulImage.style.display = "none"
                                 if (highlightedRegion) {
                                     highlightedRegion.style.fill = '#ffffff';
                                     highlightedRegion = null;
@@ -389,6 +391,7 @@
                                 // selectedArea = selectedRegion.getAttribute('area');
                                 areaInfo.textContent = `${selectedArea} km²`;
                                 imageContainer.style.display = "flex";
+                                judulImage.style.display = "flex";
                                 const selectedNameArea = selectedRegion.getAttribute('name')
                 
                                 const image1Url = `/dta_image/${selectedNameArea}/raw`;
@@ -405,6 +408,7 @@
                                 highlightedRegion = selectedRegion;
                                 selectedRegion.style.fill = 'yellow';
                                 imageContainer.style.display = "flex";
+                                judulImage.style.display = "flex";
                                 //Download 
                                 document.getElementById('download-button').addEventListener('click', function() {
                                     const url = `/download_images/${encodeURIComponent(selectedNameArea)}`;
@@ -459,6 +463,7 @@
     </div>
     <div class="cont">
         
+        <h2 id="judul-image-container" style="display:none;">Hasil Klasifikasi</h2>
         <div id="image-container" style="display:none;">
             <div class="image">
                 <h3 id="dt-name-a"></h3>

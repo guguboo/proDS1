@@ -22,6 +22,11 @@ import geopandas as gpd
 from rasterio.mask import mask
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+from rasterio.transform import xy
+from rasterio.warp import transform
+from rasterio.io import MemoryFile
+from shapely.geometry import box, mapping
+
 import numpy as np
 from collections import defaultdict
 
@@ -33,11 +38,10 @@ sys.path.append(script_dir)
 
 import time
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+#%%
 
 def predict_all():
-    for i in range(59):
+    for i in range(1):
         prediction(i)
 
 def prediction(dta_idx):
@@ -206,21 +210,47 @@ def prediction(dta_idx):
     x_all = hasil['x']
     y_all = hasil['y']
 
-
+#%%
     bands_src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     band_path = parent_dir + '/Data/satelit/21082024/'
+    src_meta = 0
+    src_transform = 0
+    src_height = 0
+    src_width = 0
+    
 
     for i in range(1, 13):
         if i == 2 or i == 3 or i == 4:
             curr_band = rasterio.open(band_path + "B" + str(i) + ".jp2")
+            src_meta = curr_band.meta
+            src_transform = curr_band.transform
+            src_height, src_width = curr_band.shape
+            # print(src_meta)
+            # print(src_transform)
+            # print(curr_band.shape)
             bands_src[i] = curr_band
+        
+            # break
 
     print("Successfully Read Bands Raster")
+    
+    matrix = np.random.rand(src_height, src_width).astype(src_meta["dtype"])
+    new_meta = src_meta.copy()
+    new_meta.update({
+        "height": matrix.shape[0],
+        "width": matrix.shape[1],
+        "count": 1,
+        "dtype": matrix.dtype,
+        "transform": src_transform,  # Retain original georeferencing
+    })
     
     DTA = gpd.read_file(script_dir + "/mygeodata.zip")
     
     src = bands_src[2]
+    
+    # print(src)
+#%%
     for idx, dta in DTA.iterrows():
         name = dta['name'] + ".xlsx"
         name = name.replace("/", "_")
@@ -264,6 +294,10 @@ def prediction(dta_idx):
     
     class_luas = defaultdict(int)
     pixel_count = hasil.shape[0]
+    latitudes = []
+    longitudes = []
+    serapan = [[],[],[],[]]
+    
     for i in range(0, pixel_count):
         j = x_all[i]
         k = y_all[i]
@@ -272,47 +306,100 @@ def prediction(dta_idx):
                 hasil_b2[j][k] = 255  # Bright Yellow
                 hasil_b3[j][k] = 255
                 hasil_b4[j][k] = 0
+                serapan[0].append(62)
+                serapan[1].append(71)
+                serapan[2].append(88)
+                serapan[3].append(91)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'agriculture':
                 hasil_b2[j][k] = 255  # Light Orange
                 hasil_b3[j][k] = 165
                 hasil_b4[j][k] = 0
+                serapan[0].append(45)
+                serapan[1].append(53)
+                serapan[2].append(67)
+                serapan[3].append(72)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'grassland':
                 hasil_b2[j][k] = 50   # Light Green
                 hasil_b3[j][k] = 205
                 hasil_b4[j][k] = 50
+                serapan[0].append(39)
+                serapan[1].append(61)
+                serapan[2].append(74)
+                serapan[3].append(80)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'settlement':
                 hasil_b2[j][k] = 255  # Light Gray
                 hasil_b3[j][k] = 0
                 hasil_b4[j][k] = 0
+                serapan[0].append(57)
+                serapan[1].append(72)
+                serapan[2].append(81)
+                serapan[3].append(86)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'tank_road_river':
                 hasil_b2[j][k] = 101  # Dark Brown
                 hasil_b3[j][k] = 67
                 hasil_b4[j][k] = 33
+                serapan[0].append(98)
+                serapan[1].append(98)
+                serapan[2].append(98)
+                serapan[3].append(98)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'forest':
                 hasil_b2[j][k] = 34   # Dark Green
                 hasil_b3[j][k] = 139
                 hasil_b4[j][k] = 34
+                serapan[0].append(25)
+                serapan[1].append(55)
+                serapan[2].append(70)
+                serapan[3].append(77)
                 class_luas[lahan[i].title()] += 400
             elif lahan[i] == 'land_without_scrub':
                 hasil_b2[j][k] = 210  # Sandy Brown
                 hasil_b3[j][k] = 180
                 hasil_b4[j][k] = 140
+                serapan[0].append(45)
+                serapan[1].append(66)
+                serapan[2].append(77)
+                serapan[3].append(83)
                 class_luas[lahan[i].title()] += 400
+            
+            projected_x, projected_y = xy(transformed, j, k)
+            
+            lon, lat = transform(bands_src[i].crs, [projected_x], [projected_y])
+            # latitude, longitude = xy(transformed, j, k)
+            print(lat)
+            print(lon)
+            latitudes.append(lat[0])
+            longitudes.append(lon[0])
         except:
             ""
     # Menentukan path untuk menyimpan gambar
+    
+    print(lat)
     output_filename = f"{dta_filename.split('.')[0]}_raw.png"  
     output_path = os.path.join(save_dir, output_filename)
     
     luas_filename = f"{dta_filename.split('.')[0]}_luas.csv"
     output_luas = os.path.join(save_dir, luas_filename)
     
+    downloadable = f"{dta_filename.split('.')[0]}_download.csv"
+    output_dld = os.path.join(save_dir, downloadable)
+    
+    
     print(class_luas)
+    result_dld = pd.DataFrame({"Latitude":latitudes,
+                               "Longitude": longitudes,
+                               "A": serapan[0],
+                               "B": serapan[1],
+                               "C": serapan[2],
+                               "D": serapan[3]
+                               })
+
+    result_dld.to_csv(output_dld)
+    
     result_luas = pd.DataFrame(list(class_luas.items()), columns=['kelas', 'luas'])
 
     result_luas.to_csv(output_luas)

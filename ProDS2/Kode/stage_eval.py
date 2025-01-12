@@ -250,7 +250,7 @@ res_akhir.head()
 results_df = pd.DataFrame({'Actual': res_akhir['land_cover'], 'Predicted': res_akhir['prediction']})
 results_df.head()
 # UBAHHH FILENAME DI SINII --------------------------------------------------------------------------------
-out_filename = "klasifikasi_bertahap_2.xlsx"
+out_filename = "klasifikasi_bertahap_1.xlsx"
 results_df.to_excel(parent_dir + "/Prediction/" + out_filename, index=False)
 
 

@@ -1,6 +1,8 @@
 ,kelas,luas
-0,Tank_Road_River,232400
-1,Grassland,10000
-2,Land_Without_Scrub,3200
-3,Settlement,109200
-4,Crop,77600
+0,Tank_Road_River,1156400
+1,Forest,8000
+2,Land_Without_Scrub,84000
+3,Agriculture,1600
+4,Settlement,435200
+5,Grassland,93600
+6,Crop,353200
