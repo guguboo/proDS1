@@ -215,12 +215,16 @@ button {
 #image-container {
     margin-top: 20px;
     text-align: center;
-    width: 70%;
     background-color: #ffffff;
+    width: 60%;
     border-radius: 8px;
     box-shadow: 1px 1px 10px gray;
     padding-top: 1%;
     padding-bottom: 2%;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
 }
 
 #dta-image1, #dta-image2 {

@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from rasterio.transform import xy
 from rasterio.warp import transform
 from rasterio.io import MemoryFile
+from pyproj import Transformer
 from shapely.geometry import box, mapping
 
 import numpy as np
@@ -34,7 +35,7 @@ import time
 
 
 def predict_all():
-    for i in range(59):
+    for i in range(1):
         prediction(i)
 
 def prediction(dta_idx):
@@ -374,10 +375,13 @@ def prediction(dta_idx):
             
             projected_x, projected_y = xy(transformed, j, k)
             
-            lon, lat = transform(bands_src[i].crs, [projected_x], [projected_y])
+            transformer = Transformer.from_crs(src.crs, "EPSG:4326", always_xy=True)
+            # lon, lat = transform(bands_src[i].crs, [projected_x], [projected_y])
+            lon, lat = transformer.transform(projected_x, projected_y)
+
             # latitude, longitude = xy(transformed, j, k)
-            print(lat)
-            print(lon)
+            # print(lat)
+            # print(lon)
             latitudes.append(lat[0])
             longitudes.append(lon[0])
         except:
@@ -391,20 +395,20 @@ def prediction(dta_idx):
     luas_filename = f"{dta_filename.split('.')[0]}_luas.csv"
     output_luas = os.path.join(save_dir, luas_filename)
     
-    # downloadable = f"{dta_filename.split('.')[0]}_download.csv"
-    # output_dld = os.path.join(save_dir, downloadable)
+    downloadable = f"{dta_filename.split('.')[0]}_download.csv"
+    output_dld = os.path.join(save_dir, downloadable)
     
     
-    # print(class_luas)
-    # result_dld = pd.DataFrame({"Latitude":latitudes,
-    #                            "Longitude": longitudes,
-    #                            "A": serapan[0],
-    #                            "B": serapan[1],
-    #                            "C": serapan[2],
-    #                            "D": serapan[3]
-    #                            })
+    print(class_luas)
+    result_dld = pd.DataFrame({"Latitude":latitudes,
+                                "Longitude": longitudes,
+                                "A": serapan[0],
+                                "B": serapan[1],
+                                "C": serapan[2],
+                                "D": serapan[3]
+                                })
 
-    # result_dld.to_csv(output_dld)
+    result_dld.to_csv(output_dld)
     
     result_luas = pd.DataFrame(list(class_luas.items()), columns=['kelas', 'luas'])
 
