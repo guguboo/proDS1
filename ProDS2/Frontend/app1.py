@@ -148,21 +148,28 @@ def download_images(dta_name):
 
     raw_image_path = os.path.join(new_path, f"{dta_name_cleaned}_raw.png")
     classified_image_path = os.path.join(new_path, f"{dta_name_cleaned}_classified.png")
-
-    if not os.path.exists(raw_image_path) or not os.path.exists(classified_image_path):
-        return jsonify({"error": "One or more images not found"}), 404
+    a_path = os.path.join(new_path, f"{dta_name_cleaned}_A.jp2")
+    b_path = os.path.join(new_path, f"{dta_name_cleaned}_B.jp2")
+    c_path = os.path.join(new_path, f"{dta_name_cleaned}_C.jp2")
+    d_path = os.path.join(new_path, f"{dta_name_cleaned}_D.jp2")
+    csv_path = os.path.join(new_path, f"{dta_name_cleaned}_download.csv")
 
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w') as zf:
         zf.write(raw_image_path, os.path.basename(raw_image_path))
         zf.write(classified_image_path, os.path.basename(classified_image_path))
+        zf.write(a_path, os.path.basename(a_path))
+        zf.write(b_path, os.path.basename(b_path))
+        zf.write(c_path, os.path.basename(c_path))
+        zf.write(d_path, os.path.basename(d_path))
+        zf.write(csv_path, os.path.basename(csv_path))
     zip_buffer.seek(0)
 
     return send_file(
         zip_buffer,
         mimetype='application/zip',
         as_attachment=True,
-        download_name=f"{dta_name_cleaned}_images.zip"
+        download_name=f"{dta_name_cleaned}.zip"
     )
 
 if __name__ == '__main__':
